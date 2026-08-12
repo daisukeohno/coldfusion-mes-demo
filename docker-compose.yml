@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: mesdb
+      LANG: C.UTF-8
+      MYSQL_USER: mesuser
+      MYSQL_PASSWORD: mespass
+      TZ: Asia/Tokyo
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_general_ci"]
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-umesuser", "-pmespass"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web:
+    image: lucee/lucee:5.4-nginx
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MES_DB_HOST: db
+      TZ: Asia/Tokyo
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./app:/var/www
