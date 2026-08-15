@@ -28,6 +28,20 @@ open http://localhost:8888/index.cfm
 - `db`: MySQL 8.0、`db/*.sql` を初期化時に投入 (スキーマ + デモデータ)
 - 停止と初期化: `docker compose down -v`
 
+## 移行版 (品質検査画面)
+
+`app/inspection.cfm` を Angular + REST API に移行したものを、現行 ColdFusion と**並存**させています (同等性検証のため削除していません)。
+
+| 構成 | ディレクトリ | 起動 |
+|---|---|---|
+| REST API (Spring Boot / Java 17) | `api/` | `cd api && MES_DB_HOST=127.0.0.1 mvn spring-boot:run` |
+| 画面 (Angular 18) | `web-angular/` | `cd web-angular && npm install && npm start` |
+
+- 判定ロジックは `api/.../inspection/InspectionJudgmentService.java` に純粋関数として切り出し、再検査閾値 0.010mm を定数で1箇所に定義しています (挙動は現行と同一)。
+- 境界値・異常系の単体テスト: `cd api && mvn test`
+- 移行手順とその他画面への展開計画: `docs/migration_playbook.md`
+- 認証は現行に存在しないため移行版も認証なしです (追加は Playbook の TODO)。
+
 ## 意図的に残しているレガシーの特徴
 
 移行デモの題材になるよう、実際の20年級 CFML システムでよく見る構造をそのまま入れています。
