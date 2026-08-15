@@ -191,6 +191,7 @@ inspection.cfm での具体例:
 docker compose up -d          # http://localhost:8888/inspection.cfm
 
 # 2. REST API
+# db サービスは 127.0.0.1:3306 を公開しているのでホストから接続できる
 cd api && MES_DB_HOST=127.0.0.1 mvn spring-boot:run   # http://localhost:8080/api/inspections
 
 # 3. Angular

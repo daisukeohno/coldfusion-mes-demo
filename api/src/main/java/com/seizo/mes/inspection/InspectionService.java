@@ -11,7 +11,11 @@ public class InspectionService {
     /** 現行画面と同一の検証メッセージ。 */
     static final String MSG_SUNPOU_NOT_NUMERIC = "測定値は数値で入力してください。";
 
+    /** 移行時に追加した検証。現行は規格値を検証せず、比較時の例外が onError でエラー画面になる。 */
     static final String MSG_KIJUN_NOT_NUMERIC = "規格下限と規格上限は数値で入力してください。";
+
+    /** 移行時に追加した検証。現行は未選択時に DB エラーがそのまま画面表示される。 */
+    static final String MSG_SHIJI_NO_REQUIRED = "製造指示を選択してください。";
 
     private final InspectionJudgmentService judgmentService;
     private final InspectionRepository repository;
@@ -22,6 +26,9 @@ public class InspectionService {
     }
 
     public InspectionResponse register(InspectionRequest request) {
+        if (request.getShijiNo() == null || request.getShijiNo().isBlank()) {
+            throw new ValidationException(MSG_SHIJI_NO_REQUIRED);
+        }
         BigDecimal sunpou = parse(request.getSunpou(), MSG_SUNPOU_NOT_NUMERIC);
         BigDecimal kijunMin = parse(request.getKijunMin(), MSG_KIJUN_NOT_NUMERIC);
         BigDecimal kijunMax = parse(request.getKijunMax(), MSG_KIJUN_NOT_NUMERIC);

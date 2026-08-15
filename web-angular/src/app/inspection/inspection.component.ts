@@ -63,6 +63,8 @@ export class InspectionComponent implements OnInit {
       next: (res) => {
         this.message = res.message;
         this.messageIsError = false;
+        // 現行は登録後に絞込なしの画面へ戻るため、登録行が必ず一覧に現れる
+        this.clearFilters();
         this.reload();
       },
       error: (err: HttpErrorResponse) => {
@@ -74,7 +76,15 @@ export class InspectionComponent implements OnInit {
 
   setHanteiFilter(hantei: string): void {
     this.filterHantei = hantei;
+    if (!hantei) {
+      this.filterShijiNo = '';
+    }
     this.reload();
+  }
+
+  clearFilters(): void {
+    this.filterHantei = '';
+    this.filterShijiNo = '';
   }
 
   setShijiNoFilter(shijiNo: string): void {

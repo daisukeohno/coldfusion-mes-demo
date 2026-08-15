@@ -70,6 +70,19 @@ class InspectionServiceValidationTest {
     }
 
     @Test
+    @DisplayName("製造指示が未選択なら検証エラー (移行時に追加した検証)")
+    void rejectsMissingShijiNo() {
+        InspectionRequest req = request("220.000");
+        req.setShijiNo("");
+        InspectionService service = service();
+        assertThatThrownBy(() -> service.register(req))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("製造指示を選択してください。");
+        verify(repository, never())
+                .insert(anyString(), anyString(), anyString(), any(), any(), any(), anyString(), anyString());
+    }
+
+    @Test
     @DisplayName("正常系は判定結果を t_kensa に登録しメッセージを返す")
     void registersJudgedResult() {
         when(repository.insert(anyString(), anyString(), anyString(), any(), any(), any(), anyString(), anyString()))

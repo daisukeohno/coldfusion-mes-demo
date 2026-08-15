@@ -37,6 +37,8 @@ open http://localhost:8888/index.cfm
 | REST API (Spring Boot / Java 17) | `api/` | `cd api && MES_DB_HOST=127.0.0.1 mvn spring-boot:run` |
 | 画面 (Angular 18) | `web-angular/` | `cd web-angular && npm install && npm start` |
 
+> `docker-compose.yml` の `db` は移行版 API をホスト側から起動できるよう `127.0.0.1:3306` を公開しています。Compose 内で API を動かす場合は `MES_DB_HOST=db` を使ってください。
+
 - 判定ロジックは `api/.../inspection/InspectionJudgmentService.java` に純粋関数として切り出し、再検査閾値 0.010mm を定数で1箇所に定義しています (挙動は現行と同一)。
 - 境界値・異常系の単体テスト: `cd api && mvn test`
 - 移行手順とその他画面への展開計画: `docs/migration_playbook.md`

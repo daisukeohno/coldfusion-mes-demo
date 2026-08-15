@@ -61,7 +61,7 @@
           <td>{{ k.hinmokuNm }}</td>
           <td>{{ k.lineCd }}</td>
           <td>{{ k.lotNo }}</td>
-          <td>{{ k.kensaYmd | date: 'yyyy/MM/dd' }}</td>
+          <td>{{ k.kensaYmd | date: 'yyyy/MM/dd' : '+0900' }}</td>
           <td>{{ k.kensaSha }}</td>
           <td class="num">{{ k.sunpou | number: '1.3-3' }}</td>
           <td class="num">{{ k.kijunMin | number: '1.3-3' }} - {{ k.kijunMax | number: '1.3-3' }}</td>
