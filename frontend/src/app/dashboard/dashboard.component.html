@@ -1,0 +1,178 @@
+<h1>
+  生産管理ダッシュボード&nbsp;&nbsp;<span class="asOf" *ngIf="dashboard"
+    >{{ formatJapaneseDate(dashboard.as_of) }} 現在</span
+  >
+</h1>
+
+<div class="box" *ngIf="message">
+  <b class="ng">{{ message }}</b>
+</div>
+
+<ng-container *ngIf="dashboard as d">
+  <table border="0" cellpadding="0" cellspacing="6" width="100%">
+    <tr valign="top">
+      <td width="20%">
+        <div class="kpi">
+          <div class="v">{{ d.kpi.total_ken }}</div>
+          <div class="l">製造指示 件数</div>
+        </div>
+      </td>
+      <td width="20%">
+        <div class="kpi">
+          <div class="v">{{ d.kpi.total_suryo | number }}</div>
+          <div class="l">指示数 合計</div>
+        </div>
+      </td>
+      <td width="20%">
+        <div class="kpi">
+          <div class="v">{{ d.kpi.total_kanryo | number }}</div>
+          <div class="l">完了数 合計</div>
+        </div>
+      </td>
+      <td width="20%">
+        <div class="kpi">
+          <div class="v vNg">{{ d.kpi.furyo_rate }}%</div>
+          <div class="l">不良率 (指示数ベース)</div>
+        </div>
+      </td>
+      <td width="20%">
+        <div class="kpi">
+          <div class="v vNg">{{ d.kpi.okure_ken }}</div>
+          <div class="l">納期遅れ 件数</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <table border="0" cellpadding="0" cellspacing="8" width="100%">
+    <tr valign="top">
+      <td width="50%">
+        <h2>■ 状態別 集計</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>状態</th>
+            <th>件数</th>
+            <th>指示数</th>
+            <th>完了数</th>
+            <th>不良数</th>
+            <th>進捗</th>
+          </tr>
+          <tr
+            *ngFor="let row of d.status_summary; index as i"
+            [ngClass]="(i + 1) % 2 === 0 ? 'alt' : ''"
+          >
+            <td>{{ row.status }}</td>
+            <td class="num">{{ row.ken }}</td>
+            <td class="num">{{ row.suryo | number }}</td>
+            <td class="num">{{ row.kanryo | number }}</td>
+            <td class="num">
+              <span class="ng" *ngIf="row.furyo > 0">{{ row.furyo }}</span>
+              <ng-container *ngIf="!(row.furyo > 0)">0</ng-container>
+            </td>
+            <td>
+              <span class="barBg"><span class="bar" [style.width.px]="row.rate"></span></span
+              >&nbsp;{{ row.rate }}%
+            </td>
+          </tr>
+        </table>
+
+        <h2>■ ライン別 進捗 (未完了分)</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>ライン</th>
+            <th>指示数</th>
+            <th>完了数</th>
+            <th>残数</th>
+            <th>不良数</th>
+          </tr>
+          <tr
+            *ngFor="let row of d.line_summary; index as i"
+            [ngClass]="(i + 1) % 2 === 0 ? 'alt' : ''"
+          >
+            <td>{{ row.line_cd }}</td>
+            <td class="num">{{ row.suryo | number }}</td>
+            <td class="num">{{ row.kanryo | number }}</td>
+            <td class="num">{{ row.zan | number }}</td>
+            <td class="num">{{ row.furyo }}</td>
+          </tr>
+        </table>
+
+        <h2>■ 検査判定 集計</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>判定</th>
+            <th>件数</th>
+          </tr>
+          <tr *ngFor="let row of d.judgment_summary">
+            <td>
+              <span class="ng" *ngIf="row.hantei === 'NG'">{{ row.hantei }}</span>
+              <ng-container *ngIf="row.hantei !== 'NG'">{{ row.hantei }}</ng-container>
+            </td>
+            <td class="num">{{ row.ken }}</td>
+          </tr>
+        </table>
+      </td>
+      <td width="50%">
+        <h2>■ 納期遅れ 一覧</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>指示番号</th>
+            <th>品目</th>
+            <th>ライン</th>
+            <th>指示/完了</th>
+            <th>納期</th>
+            <th>得意先</th>
+          </tr>
+          <tr class="late" *ngFor="let row of d.overdue_orders">
+            <td>{{ row.shiji_no }}</td>
+            <td>{{ row.hinmoku_nm }}</td>
+            <td>{{ row.line_cd }}</td>
+            <td class="num">{{ row.suryo }} / {{ row.kanryo_suryo }}</td>
+            <td>{{ formatDate(row.noki_ymd) }}</td>
+            <td>{{ row.tokui_nm }}</td>
+          </tr>
+          <tr *ngIf="d.overdue_orders.length === 0">
+            <td colspan="6">該当データなし</td>
+          </tr>
+        </table>
+
+        <h2>■ 設備 未復旧 一覧</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>設備</th>
+            <th>種別</th>
+            <th>発生日</th>
+            <th>内容</th>
+          </tr>
+          <tr class="warn" *ngFor="let row of d.open_maintenance">
+            <td>{{ row.setsubi_cd }} {{ row.setsubi_nm }}</td>
+            <td>{{ row.shubetsu }}</td>
+            <td>{{ formatDate(row.hassei_ymd) }}</td>
+            <td>{{ row.naiyo }}</td>
+          </tr>
+          <tr *ngIf="d.open_maintenance.length === 0">
+            <td colspan="4">該当データなし</td>
+          </tr>
+        </table>
+
+        <h2>■ 発注点割れ 部品</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>部品</th>
+            <th>倉庫</th>
+            <th>在庫数</th>
+            <th>発注点</th>
+            <th>不足</th>
+          </tr>
+          <tr class="warn" *ngFor="let row of d.reorder_alerts">
+            <td>{{ row.buhin_cd }} {{ row.buhin_nm }}</td>
+            <td>{{ row.souko_cd }}</td>
+            <td class="num">{{ row.zaiko_su }}</td>
+            <td class="num">{{ row.hacchu_ten }}</td>
+            <td class="num"><span class="ng">{{ row.fusoku }}</span></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</ng-container>
