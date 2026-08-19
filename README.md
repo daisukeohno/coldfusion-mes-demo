@@ -28,6 +28,61 @@ open http://localhost:8888/index.cfm
 - `db`: MySQL 8.0、`db/*.sql` を初期化時に投入 (スキーマ + デモデータ)
 - 停止と初期化: `docker compose down -v`
 
+## モダナイズ済み画面: 品質検査 (Angular + REST API)
+
+`app/inspection.cfm` を、業務ルールを保持したまま Angular + NestJS へ移行したものが `frontend/` と `api/` です。CFML 版は参照元として残しています。
+
+| ディレクトリ | スタック | 内容 |
+|---|---|---|
+| `api/` | NestJS + TypeScript | 判定ロジック (`src/inspection/inspection-judgment.service.ts`)、登録/一覧/集計 API |
+| `frontend/` | Angular 18 | 検査画面 (`src/app/inspection/`)。登録フォーム / 検査履歴 / 不良内容集計 |
+
+判定ロジックは UI・コントローラから切り離した `InspectionJudgmentService.judge()` に純粋関数として実装しています。比較は `DECIMAL(8,3)` と同じ小数3桁の整数演算で行うため、浮動小数点誤差で判定が変わりません。
+
+### エンドポイント
+
+| メソッド | パス | 内容 |
+|---|---|---|
+| POST | `/api/inspections` | 検査登録 (非数値の `sunpou` は 400 + `測定値は数値で入力してください。`) |
+| GET | `/api/inspections?shiji_no=&hantei=` | 検査履歴 (品目名・ライン付き) |
+| GET | `/api/inspections/defect-summary` | 不良内容 集計 |
+| GET | `/api/shiji-orders` | 製造指示ドロップダウン用一覧 |
+
+検索条件はすべてパラメータバインドで組み立てており、CFML 版の文字列連結 (`preserveSingleQuotes`) は踏襲していません。例外も画面全文表示ではなく構造化された JSON エラーレスポンスを返します。
+
+### 起動方法 (Docker)
+
+```bash
+docker compose up -d --build
+open http://localhost:4200        # Angular 版 品質検査
+open http://localhost:8888/inspection.cfm   # 現行 CFML 版 (比較用)
+open http://localhost:3000/api/inspections  # REST API
+```
+
+`db` サービス (MySQL `mesdb`) は現行 CFML 版と共用です。
+
+### 起動方法 (ローカル)
+
+```bash
+docker compose up -d db
+
+cd api && npm install && MES_DB_HOST=127.0.0.1 npm run start:dev   # http://localhost:3000
+cd frontend && npm install && npm start                            # http://localhost:4200 (/api は 3000 へプロキシ)
+```
+
+DB 接続情報は環境変数 `MES_DB_HOST` / `MES_DB_PORT` / `MES_DB_USER` / `MES_DB_PASSWORD` / `MES_DB_NAME` で上書きできます (既定値は `db` / `3306` / `mesuser` / `mespass` / `mesdb`)。
+
+### テスト
+
+```bash
+cd api && npm test        # 判定ロジックの境界値テスト + 登録処理テスト (DB はモック)
+cd api && npm run lint
+cd frontend && npm test   # Angular コンポーネントテスト (Chrome が必要)
+cd frontend && npm run build
+```
+
+`api/src/inspection/inspection-judgment.service.spec.ts` で `kijun_min=219.900 / kijun_max=220.100` を基準に境界値 (219.899 / 219.900 / 220.090 / 220.091 / 220.100 / 220.101) と浮動小数点誤差ケースを検証しています。
+
 ## 意図的に残しているレガシーの特徴
 
 移行デモの題材になるよう、実際の20年級 CFML システムでよく見る構造をそのまま入れています。

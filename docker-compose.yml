@@ -29,3 +29,28 @@ services:
       - "8888:8888"
     volumes:
       - ./app:/var/www
+
+  api:
+    build: ./api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MES_DB_HOST: db
+      MES_DB_PORT: "3306"
+      MES_DB_USER: mesuser
+      MES_DB_PASSWORD: mespass
+      MES_DB_NAME: mesdb
+      PORT: "3000"
+      TZ: Asia/Tokyo
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - api
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - "4200:4200"
