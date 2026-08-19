@@ -13,6 +13,10 @@ import { DailyReport } from './report.model';
   styleUrl: './report.component.css',
 })
 export class ReportComponent implements OnInit {
+  /** 承認欄の記入枠 (全角空白 4 個)。テンプレート直書きでは空白圧縮で潰れるため定数で持つ */
+  readonly approvalLine =
+    '承認欄:\u00a0 製造課長 [\u3000\u3000\u3000\u3000] \u00a0 品質保証課長 [\u3000\u3000\u3000\u3000] \u00a0 工場長 [\u3000\u3000\u3000\u3000]';
+
   /** 対象日。report.cfm と同じく集計の絞込には使われない */
   ymd = '';
   report: DailyReport | null = null;
