@@ -1,0 +1,138 @@
+<h1>設備保全</h1>
+
+<div class="box" *ngIf="message">
+  <b [class.ng]="messageIsError">{{ message }}</b>
+</div>
+
+<div class="box">
+  <form (ngSubmit)="submit()">
+    <table border="0" cellpadding="4" cellspacing="0">
+      <tr>
+        <td width="70">設備</td>
+        <td>
+          <select name="setsubi_cd" [(ngModel)]="form.setsubi_cd">
+            <option *ngFor="let e of equipmentPlans" [value]="e.setsubi_cd">
+              {{ e.setsubi_cd }} {{ e.setsubi_nm }} ({{ e.line_cd }})
+            </option>
+          </select>
+        </td>
+        <td width="50">種別</td>
+        <td>
+          <select name="shubetsu" [(ngModel)]="form.shubetsu">
+            <option *ngFor="let s of shubetsuList" [value]="s">{{ s }}</option>
+          </select>
+        </td>
+        <td width="80">停止時間(h)</td>
+        <td><input type="text" name="teishi_jikan" size="6" [(ngModel)]="form.teishi_jikan" /></td>
+        <td width="50">復旧</td>
+        <td>
+          <select name="fukyu" [(ngModel)]="form.fukyu">
+            <option value="0">未復旧</option>
+            <option value="1">復旧済</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>内容</td>
+        <td colspan="3"><input type="text" name="naiyo" size="52" [(ngModel)]="form.naiyo" /></td>
+        <td>担当</td>
+        <td><input type="text" name="tantou" size="10" [(ngModel)]="form.tantou" /></td>
+        <td colspan="2">
+          <button type="submit" class="btn" [disabled]="submitting">　登　録　</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<h2>■ 設備一覧 / 次回点検予定</h2>
+<table class="grid" width="100%">
+  <tr>
+    <th>設備コード</th>
+    <th>設備名</th>
+    <th>ライン</th>
+    <th>メーカ</th>
+    <th>導入日</th>
+    <th>経過年数</th>
+    <th>点検周期</th>
+    <th>最終点検日</th>
+    <th>次回点検予定</th>
+    <th>状態</th>
+  </tr>
+  <tr *ngFor="let row of equipmentPlans; index as i" [ngClass]="planRowClass(row, i)">
+    <td>{{ row.setsubi_cd }}</td>
+    <td>{{ row.setsubi_nm }}</td>
+    <td>{{ row.line_cd }}</td>
+    <td>{{ row.maker }}</td>
+    <td>{{ formatDate(row.dounyu_ymd) }}</td>
+    <td class="num">{{ row.keika }} 年</td>
+    <td class="num">{{ row.tenken_cycle }} 日</td>
+    <td>{{ row.last_ymd ? formatDate(row.last_ymd) : '-' }}</td>
+    <td>
+      <ng-container *ngIf="row.next_ymd; else noRecord">
+        {{ formatDate(row.next_ymd) }}
+        <span class="ng" *ngIf="row.okure"> 期限超過</span>
+      </ng-container>
+      <ng-template #noRecord><span class="ng">記録なし</span></ng-template>
+    </td>
+    <td>
+      <span class="ng" *ngIf="!row.kadou">未復旧 {{ row.open_ken }} 件</span>
+      <span class="ok" *ngIf="row.kadou">稼働</span>
+    </td>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="8" width="100%">
+  <tr valign="top">
+    <td width="70%">
+      <h2>■ 保全履歴</h2>
+      <table class="grid" width="100%">
+        <tr>
+          <th>保全ID</th>
+          <th>設備</th>
+          <th>ライン</th>
+          <th>種別</th>
+          <th>発生日</th>
+          <th>復旧日</th>
+          <th>停止時間</th>
+          <th>内容</th>
+          <th>担当</th>
+        </tr>
+        <tr *ngFor="let row of records; index as i" [ngClass]="recordRowClass(row, i)">
+          <td class="num">{{ row.hozen_id }}</td>
+          <td>{{ row.setsubi_cd }} {{ row.setsubi_nm }}</td>
+          <td>{{ row.line_cd }}</td>
+          <td>{{ row.shubetsu }}</td>
+          <td>{{ formatDate(row.hassei_ymd) }}</td>
+          <td>
+            <ng-container *ngIf="row.fukyu_ymd; else mifukyu">{{
+              formatDate(row.fukyu_ymd)
+            }}</ng-container>
+            <ng-template #mifukyu><span class="ng">未復旧</span></ng-template>
+          </td>
+          <td class="num">{{ formatJikan(row.teishi_jikan) }} h</td>
+          <td>{{ row.naiyo }}</td>
+          <td>{{ row.tantou }}</td>
+        </tr>
+      </table>
+    </td>
+    <td width="30%">
+      <h2>■ 設備別 停止時間 累計</h2>
+      <table class="grid" width="100%">
+        <tr>
+          <th>設備</th>
+          <th>件数</th>
+          <th>停止時間</th>
+        </tr>
+        <tr
+          *ngFor="let row of downtimeSummary; index as i"
+          [ngClass]="(i + 1) % 2 === 0 ? 'alt' : ''"
+        >
+          <td>{{ row.setsubi_cd }} {{ row.setsubi_nm }}</td>
+          <td class="num">{{ row.ken }}</td>
+          <td class="num">{{ formatJikan(row.jikan) }} h</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
