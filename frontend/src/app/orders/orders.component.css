@@ -7,3 +7,17 @@
 .sortLink {
   color: #ffffff;
 }
+
+/* app/mes.css の進捗バー */
+.bar {
+  background: #000080;
+  height: 10px;
+  display: inline-block;
+}
+
+.barBg {
+  background: #c0c0c0;
+  width: 100px;
+  height: 10px;
+  display: inline-block;
+}
