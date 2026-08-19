@@ -47,6 +47,11 @@ export class DashboardComponent implements OnInit {
     return value ? value.slice(0, 10).replace(/-/g, '/') : '';
   }
 
+  /** 製造指示 詳細画面 (Angular) へのリンク */
+  orderDetailLink(shijiNo: string): string {
+    return `/order-detail?shiji_no=${encodeURIComponent(shijiNo)}`;
+  }
+
   private extractErrorMessage(error: HttpErrorResponse): string {
     // DB 障害などサーバ側の異常は既定の英語文言をそのまま出さず日本語で伝える
     if (error.status >= 500 || error.status === 0) {

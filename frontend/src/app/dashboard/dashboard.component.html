@@ -124,7 +124,7 @@
             <th>得意先</th>
           </tr>
           <tr class="late" *ngFor="let row of d.overdue_orders">
-            <td>{{ row.shiji_no }}</td>
+            <td><a [href]="orderDetailLink(row.shiji_no)">{{ row.shiji_no }}</a></td>
             <td>{{ row.hinmoku_nm }}</td>
             <td>{{ row.line_cd }}</td>
             <td class="num">{{ row.suryo }} / {{ row.kanryo_suryo }}</td>
