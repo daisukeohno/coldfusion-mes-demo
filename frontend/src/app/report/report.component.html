@@ -1,0 +1,113 @@
+<h1>
+  生産日報 (印刷用)&nbsp;&nbsp;<span class="shutsuryokubi"
+    >出力日 {{ report ? formatJpDate(report.output_ymd) : '' }}</span
+  >
+</h1>
+
+<div class="box" *ngIf="message">
+  <b class="ng">{{ message }}</b>
+</div>
+
+<div class="box">
+  <form (ngSubmit)="load()">
+    対象日 <input type="text" name="ymd" size="12" [(ngModel)]="ymd" />
+    <button type="submit" class="btn" [disabled]="loading">　表示　</button>
+    &nbsp;<button type="button" class="btn" (click)="print()">印刷</button>
+    &nbsp;<span class="note">※ 対象日の絞込は未実装です (1999年からの申し送り事項)。</span>
+  </form>
+</div>
+
+<ng-container *ngIf="report as r">
+  <h2>■ ライン別 生産集計</h2>
+  <table class="grid" width="100%">
+    <tr>
+      <th>ライン</th>
+      <th>指示件数</th>
+      <th>指示数</th>
+      <th>完了数</th>
+      <th>不良数</th>
+      <th>不良率 (完了数ベース)</th>
+      <th>達成率</th>
+    </tr>
+    <tr *ngFor="let row of r.lines; index as i" [ngClass]="altClass(i)">
+      <td>{{ row.line_cd }}</td>
+      <td class="num">{{ row.ken }}</td>
+      <td class="num">{{ row.suryo | number }}</td>
+      <td class="num">{{ row.kanryo | number }}</td>
+      <td class="num">{{ row.furyo }}</td>
+      <td class="num">
+        <span *ngIf="row.furyo_rate_ng; else furyoRatePlain" class="ng">{{ row.furyo_rate }}%</span>
+        <ng-template #furyoRatePlain>{{ row.furyo_rate }}%</ng-template>
+      </td>
+      <td class="num">{{ row.tassei_rate }}%</td>
+    </tr>
+  </table>
+
+  <table border="0" cellpadding="0" cellspacing="8" width="100%">
+    <tr valign="top">
+      <td width="50%">
+        <h2>■ 工程別 実績</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>工程名</th>
+            <th>実績件数</th>
+            <th>良品数</th>
+            <th>不良数</th>
+          </tr>
+          <tr *ngFor="let row of r.kotei; index as i" [ngClass]="altClass(i)">
+            <td>{{ row.kotei_nm }}</td>
+            <td class="num">{{ row.ken }}</td>
+            <td class="num">{{ row.yoryo | number }}</td>
+            <td class="num">{{ row.furyo }}</td>
+          </tr>
+        </table>
+      </td>
+      <td width="50%">
+        <h2>■ 作業者別 実績</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>作業者</th>
+            <th>実績件数</th>
+            <th>良品数</th>
+            <th>不良数</th>
+          </tr>
+          <tr *ngFor="let row of r.sagyousha; index as i" [ngClass]="altClass(i)">
+            <td>{{ row.sagyousha }}</td>
+            <td class="num">{{ row.ken }}</td>
+            <td class="num">{{ row.yoryo | number }}</td>
+            <td class="num">{{ row.furyo }}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <h2>■ 納期遅れ 明細</h2>
+  <table class="grid" width="100%">
+    <tr>
+      <th>指示番号</th>
+      <th>品目名</th>
+      <th>納期</th>
+      <th>指示数</th>
+      <th>完了数</th>
+      <th>残数</th>
+      <th>得意先</th>
+    </tr>
+    <tr *ngFor="let row of r.okure" class="late">
+      <td>{{ row.shiji_no }}</td>
+      <td>{{ row.hinmoku_nm }}</td>
+      <td>{{ formatDate(row.noki_ymd) }}</td>
+      <td class="num">{{ row.suryo | number }}</td>
+      <td class="num">{{ row.kanryo_suryo | number }}</td>
+      <td class="num">{{ row.zansu | number }}</td>
+      <td>{{ row.tokui_nm }}</td>
+    </tr>
+    <tr *ngIf="r.okure.length === 0">
+      <td colspan="7">該当データなし</td>
+    </tr>
+  </table>
+
+  <p class="note">
+    承認欄:&nbsp; 製造課長 [　　　　] &nbsp; 品質保証課長 [　　　　] &nbsp; 工場長 [　　　　]
+  </p>
+</ng-container>

@@ -1,16 +1,24 @@
 <table class="hdr" width="100%" cellpadding="0" cellspacing="0">
   <tr>
     <td class="hdrTitle">{{ kojoName }}</td>
-    <td class="hdrInfo" align="right">品質検査 (Angular + REST API)</td>
+    <td class="hdrInfo" align="right">
+      {{ page === 'report' ? '日報 (印刷用)' : '品質検査' }} (Angular + REST API)
+    </td>
   </tr>
 </table>
 <table class="nav" width="100%" cellpadding="0" cellspacing="0">
   <tr>
-    <td class="navCell navCur"><a href="/">品質検査</a></td>
+    <td class="navCell" [class.navCur]="page === 'inspection'">
+      <a href="javascript:void(0)" (click)="setPage('inspection')">品質検査</a>
+    </td>
+    <td class="navCell" [class.navCur]="page === 'report'">
+      <a href="javascript:void(0)" (click)="setPage('report')">日報 (印刷用)</a>
+    </td>
     <td width="100%">&nbsp;</td>
   </tr>
 </table>
 
 <div class="page">
-  <app-inspection></app-inspection>
+  <app-inspection *ngIf="page === 'inspection'"></app-inspection>
+  <app-report *ngIf="page === 'report'"></app-report>
 </div>
