@@ -15,16 +15,21 @@ export class NonNumericMeasurementError extends Error {
   }
 }
 
+export class NonNumericSpecLimitError extends Error {
+  constructor() {
+    super('規格下限・規格上限は数値で入力してください。');
+    this.name = 'NonNumericSpecLimitError';
+  }
+}
+
 /**
  * 数値として解釈できる値を小数3桁の整数値へ変換する。
  * 数値でない場合は null を返す。
  */
 export function toMilli(value: unknown): number | null {
   if (typeof value === 'number') {
-    if (!Number.isFinite(value)) {
-      return null;
-    }
-    return Math.round(value * SCALE);
+    // 文字列経路と同じ丸めになるよう十進表記へ変換してから処理する
+    return Number.isFinite(value) ? toMilli(value.toFixed(10)) : null;
   }
   if (typeof value !== 'string') {
     return null;
@@ -52,6 +57,17 @@ export function isNumericValue(value: unknown): boolean {
   return toMilli(value) !== null;
 }
 
+/** DECIMAL(8,3) 列へバインドするための正規化済み文字列 (例: ' +220.1 ' -> '220.100') */
+export function toDecimalString(value: unknown): string | null {
+  const milli = toMilli(value);
+  if (milli === null) {
+    return null;
+  }
+  const sign = milli < 0 ? '-' : '';
+  const abs = Math.abs(milli);
+  return `${sign}${Math.trunc(abs / SCALE)}.${String(abs % SCALE).padStart(3, '0')}`;
+}
+
 @Injectable()
 export class InspectionJudgmentService {
   /**
@@ -65,10 +81,13 @@ export class InspectionJudgmentService {
    */
   judge(sunpou: unknown, kijunMin: unknown, kijunMax: unknown): Hantei {
     const sunpouMilli = toMilli(sunpou);
+    if (sunpouMilli === null) {
+      throw new NonNumericMeasurementError();
+    }
     const minMilli = toMilli(kijunMin);
     const maxMilli = toMilli(kijunMax);
-    if (sunpouMilli === null || minMilli === null || maxMilli === null) {
-      throw new NonNumericMeasurementError();
+    if (minMilli === null || maxMilli === null) {
+      throw new NonNumericSpecLimitError();
     }
 
     let hantei: Hantei = 'OK';

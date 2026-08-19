@@ -68,6 +68,34 @@ describe('InspectionService', () => {
       ]);
     });
 
+    it('前後空白や符号付きの入力は DECIMAL(8,3) 表記へ正規化してバインドする', async () => {
+      await service.create({ ...dto, sunpou: ' 220.000 ', kijun_max: '+220.1' });
+      const params = db.insert.mock.calls[0][1];
+      expect(params[3]).toBe('220.000');
+      expect(params[5]).toBe('220.100');
+    });
+
+    it('規格値が非数値の場合は規格値用のメッセージで 400', async () => {
+      await expect(service.create({ ...dto, kijun_max: 'x' })).rejects.toThrow(
+        '規格下限・規格上限は数値で入力してください。',
+      );
+      expect(db.insert).not.toHaveBeenCalled();
+    });
+
+    it('列長を超える文字列は 400 で、INSERT されない', async () => {
+      await expect(service.create({ ...dto, lot_no: 'L'.repeat(31) })).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(db.insert).not.toHaveBeenCalled();
+    });
+
+    it('文字列以外の型が来た場合は 400 で、INSERT されない', async () => {
+      await expect(
+        service.create({ ...dto, kensa_sha: { toString: () => 'x' } as unknown as string }),
+      ).rejects.toThrow(BadRequestException);
+      expect(db.insert).not.toHaveBeenCalled();
+    });
+
     it.each([
       ['219.899', 'NG'],
       ['220.090', 'OK'],

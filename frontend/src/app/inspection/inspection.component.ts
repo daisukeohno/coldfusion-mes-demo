@@ -50,11 +50,14 @@ export class InspectionComponent implements OnInit {
   constructor(private readonly api: InspectionApiService) {}
 
   ngOnInit(): void {
-    this.api.listShijiOrders().subscribe((orders) => {
-      this.shijiOrders = orders;
-      if (!this.form.shiji_no && orders.length > 0) {
-        this.form.shiji_no = orders[0].shiji_no;
-      }
+    this.api.listShijiOrders().subscribe({
+      next: (orders) => {
+        this.shijiOrders = orders;
+        if (!this.form.shiji_no && orders.length > 0) {
+          this.form.shiji_no = orders[0].shiji_no;
+        }
+      },
+      error: (error: HttpErrorResponse) => this.showError(error),
     });
     this.reload();
   }
@@ -67,6 +70,9 @@ export class InspectionComponent implements OnInit {
         this.submitting = false;
         this.message = result.message;
         this.messageIsError = false;
+        // CFML 版はフォームが固定初期値で再描画されるため、同じ入力状態に戻す
+        this.form.sunpou = '220.000';
+        this.form.furyo_naiyo = '';
         this.reload();
       },
       error: (error: HttpErrorResponse) => {
@@ -79,6 +85,12 @@ export class InspectionComponent implements OnInit {
 
   filter(hantei: string): void {
     this.filterHantei = hantei;
+    this.reloadList();
+  }
+
+  /** CFML 版の inspection.cfm?shiji_no=... 相当の絞込 */
+  filterByShijiNo(shijiNo: string): void {
+    this.filterShijiNo = shijiNo;
     this.reloadList();
   }
 
@@ -109,13 +121,31 @@ export class InspectionComponent implements OnInit {
 
   private reload(): void {
     this.reloadList();
-    this.api.defectSummary().subscribe((rows) => (this.defectSummary = rows));
+    this.api.defectSummary().subscribe({
+      next: (rows) => (this.defectSummary = rows),
+      error: (error: HttpErrorResponse) => {
+        this.defectSummary = [];
+        this.showError(error);
+      },
+    });
   }
 
   private reloadList(): void {
     this.api
       .listInspections({ shiji_no: this.filterShijiNo, hantei: this.filterHantei })
-      .subscribe((rows) => (this.inspections = rows));
+      .subscribe({
+        next: (rows) => (this.inspections = rows),
+        error: (error: HttpErrorResponse) => {
+          // 取得失敗時に古い一覧を残して正しい最新データに見せない
+          this.inspections = [];
+          this.showError(error);
+        },
+      });
+  }
+
+  private showError(error: HttpErrorResponse): void {
+    this.message = this.extractErrorMessage(error);
+    this.messageIsError = true;
   }
 
   private extractErrorMessage(error: HttpErrorResponse): string {

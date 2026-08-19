@@ -72,6 +72,12 @@ cd frontend && npm install && npm start                            # http://loca
 
 DB 接続情報は環境変数 `MES_DB_HOST` / `MES_DB_PORT` / `MES_DB_USER` / `MES_DB_PASSWORD` / `MES_DB_NAME` で上書きできます (既定値は `db` / `3306` / `mesuser` / `mespass` / `mesdb`)。
 
+CORS 許可オリジンは `CORS_ORIGIN` で指定します (既定値 `http://localhost:4200`)。本 API に認証は実装していないため、`*` の指定や社内ネットワーク外への公開は行わないでください。
+
+`frontend` サービスおよび `npm start` は Angular の開発サーバ (`ng serve`) です。デモ・検証用であり本番配信構成ではありません (本番では `npm run build` の成果物を静的配信してください)。
+
+登録 API は測定値・規格値が数値でない場合、および文字列項目が DB の列長 (`shiji_no` 20 / `lot_no` 30 / `kensa_sha` 60 / `furyo_naiyo` 255) を超える場合に 400 とメッセージを返します (DB エラーを表に出しません)。
+
 ### テスト
 
 ```bash

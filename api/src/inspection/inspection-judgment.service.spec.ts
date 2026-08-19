@@ -2,6 +2,8 @@ import {
   Hantei,
   InspectionJudgmentService,
   NonNumericMeasurementError,
+  NonNumericSpecLimitError,
+  toDecimalString,
   toMilli,
 } from './inspection-judgment.service';
 
@@ -71,9 +73,12 @@ describe('InspectionJudgmentService', () => {
       },
     );
 
-    it('規格値が数値でない場合もエラー', () => {
-      expect(() => service.judge('220.000', 'x', MAX)).toThrow(NonNumericMeasurementError);
-      expect(() => service.judge('220.000', MIN, 'x')).toThrow(NonNumericMeasurementError);
+    it('規格値が数値でない場合は規格値用のエラー', () => {
+      expect(() => service.judge('220.000', 'x', MAX)).toThrow(NonNumericSpecLimitError);
+      expect(() => service.judge('220.000', MIN, 'x')).toThrow(NonNumericSpecLimitError);
+      expect(() => service.judge('220.000', MIN, 'x')).toThrow(
+        '規格下限・規格上限は数値で入力してください。',
+      );
     });
   });
 
@@ -91,6 +96,25 @@ describe('InspectionJudgmentService', () => {
       ['abc', null],
     ])('toMilli(%p) === %p', (input, expected) => {
       expect(toMilli(input)).toBe(expected);
+    });
+
+    it('数値型と文字列型で丸め結果が一致する', () => {
+      expect(toMilli(220.1005)).toBe(toMilli('220.1005'));
+      expect(toMilli(-1.2345)).toBe(toMilli('-1.2345'));
+    });
+  });
+
+  describe('toDecimalString', () => {
+    it.each<[unknown, string | null]>([
+      [' 220.000 ', '220.000'],
+      ['+220.1', '220.100'],
+      ['220.', '220.000'],
+      ['.5', '0.500'],
+      [220.1, '220.100'],
+      ['-1.25', '-1.250'],
+      ['abc', null],
+    ])('toDecimalString(%p) === %p', (input, expected) => {
+      expect(toDecimalString(input)).toBe(expected);
     });
   });
 });

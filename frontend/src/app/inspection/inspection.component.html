@@ -53,7 +53,8 @@
         ■ 検査履歴 &nbsp;<span class="filter">
           絞込: <a href="javascript:void(0)" (click)="clearFilter()">すべて</a> |
           <a href="javascript:void(0)" (click)="filter('NG')">NGのみ</a> |
-          <a href="javascript:void(0)" (click)="filter('再検査')">再検査のみ</a></span
+          <a href="javascript:void(0)" (click)="filter('再検査')">再検査のみ</a>
+          <ng-container *ngIf="filterShijiNo"> | 指示番号: {{ filterShijiNo }}</ng-container></span
         >
       </h2>
       <table class="grid" width="100%">
@@ -72,7 +73,9 @@
         </tr>
         <tr *ngFor="let row of inspections; index as i" [ngClass]="rowClass(row, i)">
           <td class="num">{{ row.kensa_id }}</td>
-          <td>{{ row.shiji_no }}</td>
+          <td>
+            <a href="javascript:void(0)" (click)="filterByShijiNo(row.shiji_no)">{{ row.shiji_no }}</a>
+          </td>
           <td>{{ row.hinmoku_nm }}</td>
           <td>{{ row.line_cd }}</td>
           <td>{{ row.lot_no }}</td>

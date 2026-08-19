@@ -2,9 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { RowDataPacket } from 'mysql2/promise';
 import { DatabaseService } from '../database/database.service';
 import {
+  Hantei,
   InspectionJudgmentService,
-  isNumericValue,
   NonNumericMeasurementError,
+  NonNumericSpecLimitError,
+  toDecimalString,
 } from './inspection-judgment.service';
 import {
   CreateInspectionDto,
@@ -37,6 +39,20 @@ const SHIJI_LIST_SQL = `select s.shiji_no, h.hinmoku_nm
   join m_hinmoku h on s.hinmoku_cd = h.hinmoku_cd
   order by s.shiji_no desc`;
 
+/** DB 列長・型に合わない値は DB エラーではなく 400 で返す */
+function textField(value: string | undefined, name: string, maxLength: number): string {
+  if (value === undefined || value === null) {
+    return '';
+  }
+  if (typeof value !== 'string') {
+    throw new BadRequestException(`${name} は文字列で入力してください。`);
+  }
+  if (value.length > maxLength) {
+    throw new BadRequestException(`${name} は ${maxLength} 文字以内で入力してください。`);
+  }
+  return value;
+}
+
 @Injectable()
 export class InspectionService {
   constructor(
@@ -46,27 +62,23 @@ export class InspectionService {
 
   /** 検査結果の登録。バリデーション → 判定 → INSERT の順序は CFML と同じ */
   async create(dto: CreateInspectionDto): Promise<CreateInspectionResult> {
-    if (!isNumericValue(dto.sunpou)) {
-      throw new BadRequestException('測定値は数値で入力してください。');
+    // DECIMAL(8,3) 列へは正規化した十進文字列をバインドする (CFML の cf_sql_decimal scale=3 相当)
+    const sunpou = toDecimalString(dto.sunpou);
+    if (sunpou === null) {
+      throw new BadRequestException(new NonNumericMeasurementError().message);
+    }
+    const kijunMin = toDecimalString(dto.kijun_min);
+    const kijunMax = toDecimalString(dto.kijun_max);
+    if (kijunMin === null || kijunMax === null) {
+      throw new BadRequestException(new NonNumericSpecLimitError().message);
     }
 
-    let hantei;
-    try {
-      hantei = this.judgment.judge(dto.sunpou, dto.kijun_min, dto.kijun_max);
-    } catch (error) {
-      if (error instanceof NonNumericMeasurementError) {
-        throw new BadRequestException(error.message);
-      }
-      throw error;
-    }
+    const hantei: Hantei = this.judgment.judge(sunpou, kijunMin, kijunMax);
 
-    const shijiNo = dto.shiji_no ?? '';
-    const lotNo = dto.lot_no ?? '';
-    const kensaSha = dto.kensa_sha ?? '';
-    const furyoNaiyo = dto.furyo_naiyo ?? '';
-    const sunpou = String(dto.sunpou);
-    const kijunMin = String(dto.kijun_min);
-    const kijunMax = String(dto.kijun_max);
+    const shijiNo = textField(dto.shiji_no, 'shiji_no', 20);
+    const lotNo = textField(dto.lot_no, 'lot_no', 30);
+    const kensaSha = textField(dto.kensa_sha, 'kensa_sha', 60);
+    const furyoNaiyo = textField(dto.furyo_naiyo, 'furyo_naiyo', 255);
 
     const { insertId } = await this.db.insert(INSERT_SQL, [
       shijiNo,
