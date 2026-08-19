@@ -50,7 +50,11 @@
     <th>&nbsp;</th>
   </tr>
   <tr *ngFor="let row of orders; index as i" [ngClass]="rowClass(row, i)">
-    <td>{{ row.shiji_no }}</td>
+    <td>
+      <a routerLink="/order-detail" [queryParams]="{ shiji_no: row.shiji_no }">{{
+        row.shiji_no
+      }}</a>
+    </td>
     <td>{{ row.hinmoku_cd }}</td>
     <td>{{ row.hinmoku_nm }}</td>
     <td>{{ row.line_cd }}</td>
@@ -71,12 +75,13 @@
     <td>{{ row.status }}</td>
     <td>{{ row.tokui_nm }}</td>
     <td>{{ row.bikou }}</td>
-    <td>実績入力</td>
+    <td>
+      <a routerLink="/progress" [queryParams]="{ shiji_no: row.shiji_no }">実績入力</a>
+    </td>
   </tr>
 </table>
 <p>{{ recordCount }} 件</p>
 <div class="note">
-  ※ 指示番号・実績入力からの遷移先 (製造指示詳細・工程進捗入力) は未移行のため、この画面ではリンクになりません。<br />
   ※ 納期遅れ (背景赤 /「遅」) は「完了」以外で納期が本日より前の行です。当日納期は遅れになりません。<br />
   ※ 進捗率は 完了数 ÷ 指示数 の小数以下切り捨てです。指示数が 0 の場合は 0% です。
 </div>

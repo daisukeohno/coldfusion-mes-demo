@@ -1,16 +1,13 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { InspectionComponent } from './inspection/inspection.component';
-import { OrdersComponent } from './orders/orders.component';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, InspectionComponent, OrdersComponent],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
   readonly kojoName = '第二工場 (SEIZO-MES)';
-  screen: 'inspection' | 'orders' = 'inspection';
 }

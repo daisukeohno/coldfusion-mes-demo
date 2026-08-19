@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { OrdersApiService } from './orders-api.service';
 import { Order, OrderFilter } from './orders.model';
 
@@ -10,7 +11,7 @@ const DEFAULT_SORT = 'noki_ymd';
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.css',
 })
