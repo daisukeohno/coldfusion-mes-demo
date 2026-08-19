@@ -13,6 +13,7 @@
       [(ngModel)]="selectedShijiNo"
       (ngModelChange)="selectShijiNo($event)"
     >
+      <option value="">(選択してください)</option>
       <option *ngFor="let order of shijiOrders" [value]="order.shiji_no">
         {{ order.shiji_no }} / {{ order.hinmoku_nm }}
       </option>
@@ -130,7 +131,8 @@
           </tr>
         </table>
         <p>
-          <a [href]="'/progress.cfm?shiji_no=' + data.shiji.shiji_no"
+          <!-- 未移行画面への暫定リンク -->
+          <a [href]="'/legacy/progress.cfm?shiji_no=' + data.shiji.shiji_no"
             >▶ この指示の実績を入力する</a
           >
         </p>
@@ -166,7 +168,7 @@
           </tr>
         </table>
         <p>
-          <a [href]="'/inspection.cfm?shiji_no=' + data.shiji.shiji_no"
+          <a routerLink="/"
             >▶ 検査結果を入力する</a
           >
         </p>
@@ -181,4 +183,5 @@
   </table>
 </ng-container>
 
-<p><a href="/orders.cfm">&lt;&lt; 一覧へ戻る</a></p>
+<!-- 未移行画面への暫定リンク -->
+<p><a href="/legacy/orders.cfm">&lt;&lt; 一覧へ戻る</a></p>

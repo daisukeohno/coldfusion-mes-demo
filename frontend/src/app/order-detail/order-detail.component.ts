@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { InspectionApiService } from '../inspection/inspection-api.service';
 import { ShijiOrder } from '../inspection/inspection.model';
 import { OrderDetailApiService } from './order-detail-api.service';
@@ -15,7 +15,7 @@ import {
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './order-detail.component.html',
   styleUrl: './order-detail.component.css',
 })
@@ -41,14 +41,15 @@ export class OrderDetailComponent implements OnInit {
       if (this.queryShijiNo) {
         this.selectedShijiNo = this.queryShijiNo;
         this.reload();
+      } else {
+        this.selectedShijiNo = '';
+        this.detail = null;
+        this.setMissingShijiMessage();
       }
     });
     this.inspectionApi.listShijiOrders().subscribe({
       next: (orders) => {
         this.shijiOrders = orders;
-        if (!this.queryShijiNo && orders.length > 0) {
-          this.selectShijiNo(orders[0].shiji_no);
-        }
       },
       error: (error: HttpErrorResponse) => this.showError(error),
     });
@@ -56,8 +57,12 @@ export class OrderDetailComponent implements OnInit {
 
   selectShijiNo(shijiNo: string): void {
     this.selectedShijiNo = shijiNo;
+    if (!shijiNo) {
+      this.detail = null;
+      this.setMissingShijiMessage();
+    }
     void this.router.navigate([], {
-      queryParams: { shiji_no: shijiNo },
+      queryParams: { shiji_no: shijiNo || null },
       queryParamsHandling: 'merge',
     });
   }
@@ -137,6 +142,11 @@ export class OrderDetailComponent implements OnInit {
 
   private showError(error: HttpErrorResponse): void {
     this.message = this.extractErrorMessage(error);
+    this.messageIsError = true;
+  }
+
+  private setMissingShijiMessage(): void {
+    this.message = '指示番号  は登録されていません。';
     this.messageIsError = true;
   }
 
