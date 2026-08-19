@@ -48,6 +48,10 @@ export class DashboardComponent implements OnInit {
   }
 
   private extractErrorMessage(error: HttpErrorResponse): string {
+    // DB 障害などサーバ側の異常は既定の英語文言をそのまま出さず日本語で伝える
+    if (error.status >= 500 || error.status === 0) {
+      return 'システムエラーが発生しました。管理者へ連絡してください。';
+    }
     const body = error.error as { message?: string | string[] } | string | null;
     if (typeof body === 'string' && body) {
       return body;
