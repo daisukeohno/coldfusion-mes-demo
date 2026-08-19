@@ -106,7 +106,7 @@
           </tr>
           <tr
             *ngFor="let row of data.kotei; index as i"
-            [ngClass]="processRowClass(row, i)"
+            [ngClass]="processRowClass(i)"
           >
             <td class="num">{{ row.kotei_no }}</td>
             <td>{{ row.kotei_nm }}</td>
@@ -152,7 +152,7 @@
             [ngClass]="inspectionRowClass(row, i)"
           >
             <td>{{ row.lot_no }}</td>
-            <td>{{ formatDate(row.kensa_ymd).slice(5) }}</td>
+            <td>{{ formatMonthDate(row.kensa_ymd) }}</td>
             <td>{{ row.kensa_sha }}</td>
             <td class="num">{{ formatFixed(row.sunpou, 3) }}</td>
             <td class="num">

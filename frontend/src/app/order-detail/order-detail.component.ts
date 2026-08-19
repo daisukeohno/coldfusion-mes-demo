@@ -62,7 +62,7 @@ export class OrderDetailComponent implements OnInit {
     });
   }
 
-  processRowClass(row: OrderDetailProcess, index: number): string {
+  processRowClass(index: number): string {
     return (index + 1) % 2 === 0 ? 'alt' : '';
   }
 
@@ -93,6 +93,10 @@ export class OrderDetailComponent implements OnInit {
 
   formatDate(value: string | null): string {
     return value ? value.slice(0, 10).replace(/-/g, '/') : '';
+  }
+
+  formatMonthDate(value: string | null): string {
+    return value ? value.slice(5, 10).replace('-', '/') : '';
   }
 
   formatDateTime(value: string | null): string {

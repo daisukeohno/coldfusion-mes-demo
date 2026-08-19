@@ -23,6 +23,20 @@ describe('OrderDetailSummaryService', () => {
         service.calculate({ suryo: 20, kanryo_suryo: 23, hyojun_jikan: '1.00' }).rate,
       ).toBe(115);
     });
+
+    it.each([
+      [100, 29, 28, 29],
+      [100, 57, 56, 57],
+      [200, 58, 28, 29],
+    ])(
+      '現実的な完了数 %i / 指示数 %i では素朴な計算 %i ではなく %i',
+      (suryo, kanryo, naive, expected) => {
+        expect(Math.trunc((kanryo / suryo) * 100)).toBe(naive);
+        expect(
+          service.calculate({ suryo, kanryo_suryo: kanryo, hyojun_jikan: '1.00' }).rate,
+        ).toBe(expected);
+      },
+    );
   });
 
   describe('zan', () => {
@@ -51,6 +65,12 @@ describe('OrderDetailSummaryService', () => {
     it('標準工数が null の場合は null', () => {
       expect(
         service.calculate({ suryo: 3, kanryo_suryo: 0, hyojun_jikan: null }).yotei_kosu,
+      ).toBeNull();
+    });
+
+    it('標準工数が数値でない文字列の場合も null', () => {
+      expect(
+        service.calculate({ suryo: 3, kanryo_suryo: 0, hyojun_jikan: 'abc' }).yotei_kosu,
       ).toBeNull();
     });
   });
