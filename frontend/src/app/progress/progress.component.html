@@ -1,0 +1,96 @@
+<h1>工程進捗 入力</h1>
+
+<div class="box msg" *ngIf="message" [class.msgNg]="messageIsError">
+  <b [class.ng]="messageIsError">{{ message }}</b>
+</div>
+
+<div class="box">
+  <form (ngSubmit)="submit()">
+    <table border="0" cellpadding="4" cellspacing="0">
+      <tr>
+        <td width="90">製造指示 <span class="ng">*</span></td>
+        <td>
+          <select name="shiji_no" [(ngModel)]="form.shiji_no">
+            <option *ngFor="let o of shijiOrders" [value]="o.shiji_no">
+              {{ o.shiji_no }} / {{ o.hinmoku_nm }} ({{ o.line_cd }})
+            </option>
+          </select>
+        </td>
+        <td width="70">工程順</td>
+        <td><input type="text" name="kotei_no" size="3" [(ngModel)]="form.kotei_no" /></td>
+        <td width="70">工程名</td>
+        <td>
+          <select name="kotei_nm" [(ngModel)]="form.kotei_nm">
+            <option *ngFor="let k of koteiNames" [value]="k">{{ k }}</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>設備</td>
+        <td>
+          <select name="setsubi_cd" [(ngModel)]="form.setsubi_cd">
+            <option value="">(なし)</option>
+            <option *ngFor="let s of setsubiList" [value]="s.setsubi_cd">
+              {{ s.setsubi_cd }} {{ s.setsubi_nm }} ({{ s.line_cd }})
+            </option>
+          </select>
+        </td>
+        <td>作業者</td>
+        <td><input type="text" name="sagyousha" size="12" [(ngModel)]="form.sagyousha" /></td>
+        <td>良品数 <span class="ng">*</span></td>
+        <td><input type="text" name="yoryo_suryo" size="6" [(ngModel)]="form.yoryo_suryo" /></td>
+      </tr>
+      <tr>
+        <td>不良数 <span class="ng">*</span></td>
+        <td><input type="text" name="furyo_suryo" size="6" [(ngModel)]="form.furyo_suryo" /></td>
+        <td>工程完了</td>
+        <td>
+          <select name="kanryo" [(ngModel)]="form.kanryo">
+            <option value="0">未完了</option>
+            <option value="1">完了</option>
+          </select>
+        </td>
+        <td colspan="2">
+          <button type="submit" class="btn" [disabled]="submitting">　登　録　</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+  <div class="note">
+    ※ 登録すると製造指示の完了数に加算されます。取消機能はありません
+    (誤登録時は情報システム部に連絡してください)。
+  </div>
+</div>
+
+<h2>■ 直近の実績 (15件)</h2>
+<table class="grid" width="100%">
+  <tr>
+    <th>実績ID</th>
+    <th>指示番号</th>
+    <th>工程</th>
+    <th>工程名</th>
+    <th>設備</th>
+    <th>作業者</th>
+    <th>開始</th>
+    <th>終了</th>
+    <th>良品数</th>
+    <th>不良数</th>
+  </tr>
+  <tr *ngFor="let row of records; index as i" [ngClass]="rowClass(i)">
+    <td class="num">{{ row.jisseki_id }}</td>
+    <td>{{ row.shiji_no }}</td>
+    <td class="num">{{ row.kotei_no }}</td>
+    <td>{{ row.kotei_nm }}</td>
+    <td>{{ setsubiLabel(row) }}</td>
+    <td>{{ row.sagyousha }}</td>
+    <td>{{ formatDateTime(row.kaishi_dt) }}</td>
+    <td>
+      <ng-container *ngIf="row.shuryo_dt; else sagyouchu">{{
+        formatDateTime(row.shuryo_dt)
+      }}</ng-container>
+      <ng-template #sagyouchu><span class="ng">作業中</span></ng-template>
+    </td>
+    <td class="num">{{ row.yoryo_suryo }}</td>
+    <td class="num">{{ row.furyo_suryo }}</td>
+  </tr>
+</table>
