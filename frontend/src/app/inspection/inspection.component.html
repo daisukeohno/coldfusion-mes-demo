@@ -1,0 +1,97 @@
+<h1>品質検査</h1>
+
+@if (message) {
+  <div class="box">
+    <b [class.ng]="!message.ok">{{ message.text }}</b>
+  </div>
+}
+
+<div class="box">
+  <form (ngSubmit)="register()">
+    <table border="0" cellpadding="4" cellspacing="0">
+      <tr>
+        <td width="90">製造指示</td>
+        <td>
+          <select name="shiji_no" [(ngModel)]="form.shiji_no">
+            @for (o of orders; track o.shiji_no) {
+              <option [value]="o.shiji_no">{{ o.shiji_no }} / {{ o.hinmoku_nm }}</option>
+            }
+          </select>
+        </td>
+        <td width="60">ロット</td>
+        <td><input type="text" name="lot_no" size="14" [(ngModel)]="form.lot_no"></td>
+        <td width="60">検査者</td>
+        <td><input type="text" name="kensa_sha" size="12" [(ngModel)]="form.kensa_sha"></td>
+      </tr>
+      <tr>
+        <td>測定値 (mm)</td>
+        <td><input type="text" name="sunpou" size="10" [(ngModel)]="form.sunpou"></td>
+        <td>規格下限</td>
+        <td><input type="text" name="kijun_min" size="10" [(ngModel)]="form.kijun_min"></td>
+        <td>規格上限</td>
+        <td><input type="text" name="kijun_max" size="10" [(ngModel)]="form.kijun_max"></td>
+      </tr>
+      <tr>
+        <td>不良内容</td>
+        <td colspan="3">
+          <input type="text" name="furyo_naiyo" size="46" [(ngModel)]="form.furyo_naiyo">
+        </td>
+        <td colspan="2"><button type="submit" class="btn">　判定・登録　</button></td>
+      </tr>
+    </table>
+  </form>
+  <div style="font-size:11px;color:#606060;padding-top:4px;">
+    ※ 判定は規格範囲で自動決定します。規格上限との差が 0.010mm 未満の場合は「再検査」となります
+    (2011年 暫定運用)。
+  </div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="8" width="100%">
+  <tr valign="top">
+    <td width="72%">
+      <h2>
+        ■ 検査履歴
+        &nbsp;<span style="font-weight:normal;font-size:11px;">
+          絞込:
+          <a href="javascript:void(0)" (click)="filterBy('')">すべて</a> |
+          <a href="javascript:void(0)" (click)="filterBy('NG')">NGのみ</a> |
+          <a href="javascript:void(0)" (click)="filterBy('再検査')">再検査のみ</a>
+        </span>
+      </h2>
+      <table class="grid" width="100%">
+        <tr>
+          <th>検査ID</th><th>指示番号</th><th>品目名</th><th>ライン</th><th>ロット</th>
+          <th>検査日</th><th>検査者</th><th>測定値</th><th>規格範囲</th><th>判定</th><th>不良内容</th>
+        </tr>
+        @for (k of kensaList; track k.kensa_id; let i = $index) {
+          <tr [class]="rowClass(k, i)">
+            <td class="num">{{ k.kensa_id }}</td>
+            <td>{{ k.shiji_no }}</td>
+            <td>{{ k.hinmoku_nm }}</td>
+            <td>{{ k.line_cd }}</td>
+            <td>{{ k.lot_no }}</td>
+            <td>{{ k.kensa_ymd | date: 'yyyy/MM/dd' }}</td>
+            <td>{{ k.kensa_sha }}</td>
+            <td class="num">{{ formatSunpou(k.sunpou) }}</td>
+            <td class="num">{{ formatSunpou(k.kijun_min) }} - {{ formatSunpou(k.kijun_max) }}</td>
+            <td><span [class]="textClass(k.hantei)">{{ k.hantei }}</span></td>
+            <td>{{ k.furyo_naiyo }}</td>
+          </tr>
+        }
+      </table>
+      <p>{{ kensaList.length }} 件</p>
+    </td>
+    <td width="28%">
+      <h2>■ 不良内容 集計</h2>
+      <table class="grid" width="100%">
+        <tr><th>不良内容</th><th>件数</th></tr>
+        @for (f of defectSummary; track f.furyo_naiyo; let i = $index) {
+          <tr [class.alt]="i % 2 === 1">
+            <td>{{ f.furyo_naiyo }}</td>
+            <td class="num">{{ f.ken }}</td>
+          </tr>
+        }
+      </table>
+    </td>
+  </tr>
+</table>
