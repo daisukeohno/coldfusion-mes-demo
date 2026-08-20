@@ -28,6 +28,26 @@ open http://localhost:8888/index.cfm
 - `db`: MySQL 8.0、`db/*.sql` を初期化時に投入 (スキーマ + デモデータ)
 - 停止と初期化: `docker compose down -v`
 
+## 移行済み画面: 品質検査 (Angular + REST API)
+
+品質検査画面 (`app/inspection.cfm`) は Angular + Spring Boot へ移行済みです。DB は CFML 版と同一の
+`mesdb` / `t_kensa` を共有するため (Strangler Fig)、どちらの画面から登録しても同じデータを参照します。
+
+```bash
+docker compose up -d db web                      # MySQL + 現行 CFML (http://localhost:8888/inspection.cfm)
+(cd api && MES_DB_HOST=127.0.0.1 mvn spring-boot:run)   # REST API  http://localhost:8080/api/inspections
+(cd frontend && npm install && npm start)        # Angular   http://localhost:4200/inspection (/api は 8080 へプロキシ)
+```
+
+| 種別 | 内容 |
+|---|---|
+| 判定ロジック | `api/.../inspection/InspectionJudgmentService.java` に純関数として一元化 (DB/HTTP 非依存) |
+| API | `POST /api/inspections`, `GET /api/inspections`, `GET /api/inspections/defect-summary`, `GET /api/orders/for-inspection` |
+| テスト | `cd api && mvn test` (判定の境界値 + MockMvc 統合)、`cd frontend && npm run test:ci` |
+
+現行の挙動 (下限ちょうどは OK、上限との差 0.010 ちょうどは OK、下限側は再検査判定しない) は
+仕様変更せずテストで固定しています。
+
 ## 意図的に残しているレガシーの特徴
 
 移行デモの題材になるよう、実際の20年級 CFML システムでよく見る構造をそのまま入れています。

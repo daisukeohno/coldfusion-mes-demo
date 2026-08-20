@@ -1,0 +1,26 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="hdr">
+  <tr>
+    <td class="hdrTitle">生産管理システム&nbsp;SEIZO-MES&nbsp;Ver.3.2</td>
+    <td align="right" class="hdrInfo">{{ kojoName }}&nbsp;|&nbsp;担当者: 未ログイン&nbsp;</td>
+  </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="nav">
+  <tr>
+    @for (m of menu; track m.path) {
+      <td class="navCell" routerLinkActive="navCur">
+        <a [routerLink]="m.path">{{ m.label }}</a>
+      </td>
+    }
+    <td width="100%">&nbsp;</td>
+  </tr>
+</table>
+
+<div class="page">
+  <router-outlet></router-outlet>
+</div>
+
+<table width="100%" border="0" cellpadding="4" cellspacing="0" class="ftr">
+  <tr>
+    <td>SEIZO-MES Ver.3.2</td>
+  </tr>
+</table>
