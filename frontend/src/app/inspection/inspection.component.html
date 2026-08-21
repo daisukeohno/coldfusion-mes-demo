@@ -1,0 +1,92 @@
+<h1>品質検査</h1>
+
+<div class="box" *ngIf="message">
+  <b [class.ng]="messageIsError">{{ message }}</b>
+</div>
+
+<div class="box">
+  <form (ngSubmit)="register()">
+    <table border="0" cellpadding="4" cellspacing="0">
+      <tr>
+        <td width="90">製造指示</td>
+        <td>
+          <select name="shiji_no" [(ngModel)]="form.shiji_no">
+            <option *ngFor="let order of orders" [value]="order.shiji_no">
+              {{ order.shiji_no }} / {{ order.hinmoku_nm }}
+            </option>
+          </select>
+        </td>
+        <td width="60">ロット</td>
+        <td><input type="text" name="lot_no" size="14" [(ngModel)]="form.lot_no"></td>
+        <td width="60">検査者</td>
+        <td><input type="text" name="kensa_sha" size="12" [(ngModel)]="form.kensa_sha"></td>
+      </tr>
+      <tr>
+        <td>測定値 (mm)</td>
+        <td><input type="text" name="sunpou" size="10" [(ngModel)]="form.sunpou"></td>
+        <td>規格下限</td>
+        <td><input type="text" name="kijun_min" size="10" [(ngModel)]="form.kijun_min"></td>
+        <td>規格上限</td>
+        <td><input type="text" name="kijun_max" size="10" [(ngModel)]="form.kijun_max"></td>
+      </tr>
+      <tr>
+        <td>不良内容</td>
+        <td colspan="3"><input type="text" name="furyo_naiyo" size="46" [(ngModel)]="form.furyo_naiyo"></td>
+        <td colspan="2"><input type="submit" value="　判定・登録　" class="btn"></td>
+      </tr>
+    </table>
+  </form>
+  <div class="note">
+    ※ 判定は規格範囲で自動決定します。規格上限との差が 0.010mm 未満の場合は「再検査」となります (2011年 暫定運用)。
+  </div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="8" width="100%">
+  <tr valign="top">
+    <td width="72%">
+      <h2>■ 検査履歴
+        &nbsp;<span class="filter">
+          絞込:
+          <a href="javascript:void(0)" (click)="setFilter('')">すべて</a> |
+          <a href="javascript:void(0)" (click)="setFilter('NG')">NGのみ</a> |
+          <a href="javascript:void(0)" (click)="setFilter('再検査')">再検査のみ</a>
+        </span>
+      </h2>
+      <table class="grid" width="100%">
+        <tr>
+          <th>検査ID</th><th>指示番号</th><th>品目名</th><th>ライン</th><th>ロット</th><th>検査日</th>
+          <th>検査者</th><th>測定値</th><th>規格範囲</th><th>判定</th><th>不良内容</th>
+        </tr>
+        <tr *ngFor="let record of records; let i = index" [ngClass]="rowClass(record, i)">
+          <td class="num">{{ record.kensa_id }}</td>
+          <td>
+            <a [href]="legacyBaseUrl + '/order_detail.cfm?shiji_no=' + record.shiji_no">{{ record.shiji_no }}</a>
+          </td>
+          <td>{{ record.hinmoku_nm }}</td>
+          <td>{{ record.line_cd }}</td>
+          <td>{{ record.lot_no }}</td>
+          <td>{{ record.kensa_ymd | date: 'yyyy/MM/dd' }}</td>
+          <td>{{ record.kensa_sha }}</td>
+          <td class="num">{{ formatMm(record.sunpou) }}</td>
+          <td class="num">{{ formatMm(record.kijun_min) }} - {{ formatMm(record.kijun_max) }}</td>
+          <td>
+            <span *ngIf="record.hantei === 'OK'; else ngHantei" class="ok">OK</span>
+            <ng-template #ngHantei><span class="ng">{{ record.hantei }}</span></ng-template>
+          </td>
+          <td>{{ record.furyo_naiyo }}</td>
+        </tr>
+      </table>
+      <p>{{ records.length }} 件</p>
+    </td>
+    <td width="28%">
+      <h2>■ 不良内容 集計</h2>
+      <table class="grid" width="100%">
+        <tr><th>不良内容</th><th>件数</th></tr>
+        <tr *ngFor="let defect of defects; let i = index" [ngClass]="(i + 1) % 2 === 0 ? 'alt' : ''">
+          <td>{{ defect.furyo_naiyo }}</td>
+          <td class="num">{{ defect.ken }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
