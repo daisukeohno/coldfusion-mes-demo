@@ -29,6 +29,19 @@
 
 境界値は `src/test/java/jp/co/seizo/mes/inspection/InspectionJudgmentServiceTest.java` で固定している。
 
+### 現行 CFML との既知の差異 (差がちょうど 0.010 のケース)
+
+現行 `app/inspection.cfm` は `(form.kijun_max - form.sunpou) LT 0.010` を浮動小数点で評価するため、
+差がちょうど 0.010 のときの判定が値によって揺れる。
+
+| 測定値 | 規格 | 現行 (double) | 本実装 (BigDecimal) |
+| --- | --- | --- | --- |
+| 220.090 | 219.900 - 220.100 | 再検査 (`220.100-220.090 = 0.009999999999990905`) | OK |
+| 100.490 | 100.000 - 100.500 | OK (`100.500-100.490 = 0.0100000000000051`) | OK |
+
+本実装は「差が 0.010 **未満**なら再検査」という業務ルールに忠実な BigDecimal 比較で一貫させており、
+差がちょうど 0.010 の場合は常に `OK` とする (意図的な差異)。
+
 ## 入力バリデーション
 
 測定値 `sunpou` が数値でない (空を含む) 場合は登録せず、現行と同じメッセージ
@@ -52,7 +65,9 @@
 # DB (既存 docker-compose の db)
 docker compose up -d db
 
-MES_DB_HOST=127.0.0.1 mvn spring-boot:run   # http://localhost:8080/api/inspections
+# db はホストへポート公開していないため、ホスト実行時はコンテナ IP を指定する
+MES_DB_HOST=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' coldfusion-mes-demo-db-1) \
+  mvn spring-boot:run                       # http://localhost:8080/api/inspections
 mvn test                                    # 境界値テスト + MockMvc テスト
 ```
 

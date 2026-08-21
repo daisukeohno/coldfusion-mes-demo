@@ -61,7 +61,7 @@ open http://localhost:8888/inspection.cfm   # 現行 (ColdFusion)
 open http://localhost:4200                  # 移行版 (Angular + REST API)
 ```
 
-開発時は `cd backend && MES_DB_HOST=127.0.0.1 mvn spring-boot:run` と `cd frontend && npm start`
+開発時は `cd backend && MES_DB_HOST=<db コンテナ IP> mvn spring-boot:run` (詳細は `backend/README.md`) と `cd frontend && npm start`
 (dev-server の `/api` は `localhost:8080` へプロキシ) で起動します。
 
 ## デモの進め方
