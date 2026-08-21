@@ -46,6 +46,24 @@ open http://localhost:8888/index.cfm
 
 これらは「移行前に仕様を復元しないと同等性を証明できない」という論点を、画面を見ながら説明するための材料です。
 
+## 品質検査画面の移行版 (backend / frontend)
+
+`app/inspection.cfm` (品質検査) を業務ルールを保持したまま Angular + REST API へ移行したものを併設しています。
+現行画面は突合検証のため残してあり、同じ `mesdb` を参照します。
+
+- `backend/`: Spring Boot (Java 17)。判定ロジックは `InspectionJudgmentService` に切り出し、境界値テストで固定。
+  判定ルールと 0.010 の厳密不等号・2011年暫定運用の由来は `backend/README.md` に記載。
+- `frontend/`: Angular。`InspectionComponent` + `InspectionService` (HttpClient)。フロント側に判定ロジックは持たない。
+
+```bash
+docker compose up -d db web backend frontend
+open http://localhost:8888/inspection.cfm   # 現行 (ColdFusion)
+open http://localhost:4200                  # 移行版 (Angular + REST API)
+```
+
+開発時は `cd backend && MES_DB_HOST=127.0.0.1 mvn spring-boot:run` と `cd frontend && npm start`
+(dev-server の `/api` は `localhost:8080` へプロキシ) で起動します。
+
 ## デモの進め方
 
 `docs/demo_script.md` を参照してください。Ask Devin での資産把握から、仕様復元、Angular などモダンスタックへの移行、テストマトリクス生成までの流れを記載しています。

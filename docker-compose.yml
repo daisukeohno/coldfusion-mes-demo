@@ -29,3 +29,27 @@ services:
       - "8888:8888"
     volumes:
       - ./app:/var/www
+
+  # 移行版バックエンド (Spring Boot)。判定ロジックは InspectionJudgmentService に集約
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MES_DB_HOST: db
+      MES_DB_USER: mesuser
+      MES_DB_PASSWORD: mespass
+      TZ: Asia/Tokyo
+    ports:
+      - "8080:8080"
+
+  # 移行版フロントエンド (Angular)。/api は backend へプロキシ
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - "4200:80"

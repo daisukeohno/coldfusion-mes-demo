@@ -1,0 +1,14 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: mes-inspection-api
+  datasource:
+    # 既存 app/Application.cfc の DSN 定義に合わせている (host は MES_DB_HOST で上書き可)
+    url: jdbc:mysql://${MES_DB_HOST:db}:${MES_DB_PORT:3306}/${MES_DB_NAME:mesdb}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Tokyo&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${MES_DB_USER:mesuser}
+    password: ${MES_DB_PASSWORD:mespass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    default-property-inclusion: always
