@@ -48,7 +48,7 @@ export class InspectionRegistrationComponent implements OnInit {
   submit(): void {
     this.error = '';
     this.result = null;
-    if (this.form.invalid || !this.preview) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }

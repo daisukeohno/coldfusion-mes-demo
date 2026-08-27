@@ -15,7 +15,9 @@ export class InspectionJudgmentService {
   }
 
   private toScaledInteger(value: string): number {
-    const [whole, fraction = ''] = value.split('.');
-    return Number(whole) * 1000 + Number(fraction.padEnd(3, '0'));
+    const sign = value.startsWith('-') ? -1 : 1;
+    const magnitude = sign < 0 ? value.slice(1) : value;
+    const [whole, fraction = ''] = magnitude.split('.');
+    return sign * (Number(whole) * 1000 + Number(fraction.padEnd(3, '0')));
   }
 }

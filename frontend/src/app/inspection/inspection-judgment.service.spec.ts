@@ -12,6 +12,8 @@ describe('InspectionJudgmentService', () => {
     ['difference .009', '220.091', '219.900', '220.100', '再検査'],
     ['difference .011', '220.089', '219.900', '220.100', 'OK'],
     ['legacy default', '220.000', '219.900', '220.100', 'OK'],
+    ['negative measurement in range', '-1.500', '-2.000', '-1.000', 'OK'],
+    ['negative measurement below minimum', '-2.100', '-2.000', '-1.000', 'NG'],
   ])('%s', (_name, sunpou, minimum, maximum, expected) => {
     expect(service.judge(sunpou, minimum, maximum)).toBe(expected);
   });
