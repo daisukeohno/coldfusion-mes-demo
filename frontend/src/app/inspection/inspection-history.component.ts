@@ -26,7 +26,6 @@ export class InspectionHistoryComponent {
 
   setFilter(filter: InspectionJudgment | ''): void {
     this.filter.set(filter);
-    this.load();
   }
 
   private load(): void {
