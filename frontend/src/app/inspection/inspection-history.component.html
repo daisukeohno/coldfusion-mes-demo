@@ -1,0 +1,24 @@
+<section>
+  <h2>■ 検査履歴 <span class="filters">
+    絞込:
+    <button type="button" [class.active]="filter() === ''" (click)="setFilter('')">すべて</button> |
+    <button type="button" [class.active]="filter() === 'NG'" (click)="setFilter('NG')">NGのみ</button> |
+    <button type="button" [class.active]="filter() === '再検査'" (click)="setFilter('再検査')">再検査のみ</button>
+  </span></h2>
+  @if (error(); as message) {
+    <p class="error">{{ message }}</p>
+  }
+  <div class="table-wrap">
+    <table class="grid">
+      <thead><tr><th>検査ID</th><th>指示番号</th><th>品目名</th><th>ライン</th><th>ロット</th><th>検査日</th><th>検査者</th><th>測定値</th><th>規格範囲</th><th>判定</th><th>不良内容</th></tr></thead>
+      <tbody>
+        @for (record of records(); track record.kensa_id; let even = $even) {
+        <tr [class.late]="record.hantei === 'NG'" [class.warn]="record.hantei === '再検査'" [class.alt]="even && record.hantei === 'OK'">
+          <td class="num">{{ record.kensa_id }}</td><td>{{ record.shiji_no }}</td><td>{{ record.hinmoku_nm }}</td><td>{{ record.line_cd }}</td><td>{{ record.lot_no }}</td><td>{{ record.kensa_ymd | date:'yyyy/MM/dd' }}</td><td>{{ record.kensa_sha }}</td><td class="num">{{ record.sunpou }}</td><td class="num">{{ record.kijun_min }} - {{ record.kijun_max }}</td><td><span [class.ok]="record.hantei === 'OK'" [class.ng]="record.hantei !== 'OK'">{{ record.hantei }}</span></td><td>{{ record.furyo_naiyo }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p>{{ records().length }} 件</p>
+</section>

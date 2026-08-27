@@ -9,6 +9,8 @@ services:
       MYSQL_PASSWORD: mespass
       TZ: Asia/Tokyo
     command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_general_ci"]
+    ports:
+      - "3306:3306"
     volumes:
       - ./db:/docker-entrypoint-initdb.d:ro
     healthcheck:
@@ -29,3 +31,23 @@ services:
       - "8888:8888"
     volumes:
       - ./app:/var/www
+
+  api:
+    build:
+      context: ./api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MES_DB_HOST: db
+      TZ: Asia/Tokyo
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - api
+    ports:
+      - "4200:80"

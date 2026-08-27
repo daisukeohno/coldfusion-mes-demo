@@ -46,6 +46,47 @@ open http://localhost:8888/index.cfm
 
 これらは「移行前に仕様を復元しないと同等性を証明できない」という論点を、画面を見ながら説明するための材料です。
 
+## 品質検査画面のモダナイズ版 (API + Angular)
+
+レガシー画面 `app/inspection.cfm` は比較用に残したまま、品質検査機能を NestJS
+API (`api/`) と Angular (`frontend/`) に移行しています。判定は API の応答を正とし、
+画面上の判定は入力中のプレビューです。
+
+### ローカルで起動
+
+```bash
+cd api
+npm install
+npm run start:dev             # http://localhost:3000
+
+# 別ターミナル
+cd frontend
+npm install
+npm start                    # http://localhost:4200
+```
+
+Angular 開発サーバーは `proxy.conf.json` で `/api` を API (3000 番) に転送します。
+API は `MES_DB_HOST` (未指定時 `db`) の MySQL (`mesdb` / `mesuser` / `mespass`) に接続します。
+
+### Docker Compose で起動
+
+```bash
+docker compose up -d
+open http://localhost:8888/index.cfm  # レガシー画面
+open http://localhost:4200            # Angular 画面
+```
+
+初回は MySQL の初期化に1分ほどかかります。`docker compose down -v` でデータも削除できます。
+
+### テスト
+
+```bash
+(cd api && npm run lint && npm test && npm run build)
+(cd frontend && npm test)            # Angular/Vitest, headless・非ウォッチ
+(cd frontend && npm run build)
+docker compose config
+```
+
 ## デモの進め方
 
 `docs/demo_script.md` を参照してください。Ask Devin での資産把握から、仕様復元、Angular などモダンスタックへの移行、テストマトリクス生成までの流れを記載しています。
