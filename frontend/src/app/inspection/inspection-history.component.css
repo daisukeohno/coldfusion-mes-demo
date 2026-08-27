@@ -1,0 +1,14 @@
+h2 { font-size: 13px; margin: 14px 0 6px; }
+.filters { font-size: 11px; font-weight: normal; }
+button { background: none; border: 0; color: #000080; cursor: pointer; font: inherit; padding: 0 2px; text-decoration: underline; }
+button.active { font-weight: bold; text-decoration: none; }
+.table-wrap { overflow-x: auto; }
+.grid { background: #fff; border-collapse: collapse; width: 100%; }
+.grid th { background: #000080; border: 1px solid #808080; color: #fff; font-size: 11px; font-weight: normal; padding: 4px 7px; white-space: nowrap; }
+.grid td { border: 1px solid #c0c0c0; font-size: 12px; padding: 3px 7px; white-space: nowrap; }
+.grid tr.alt td { background: #f2f2f2; }
+.grid tr.late td { background: #ffdddd; }
+.grid tr.warn td { background: #ffffcc; }
+.num { text-align: right; }
+.ok { color: #060; }
+.ng, .error { color: #c00; font-weight: bold; }

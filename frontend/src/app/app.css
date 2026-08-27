@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.hdr { background: #000080; padding: 6px 10px; }
+.hdr-title { color: #fff; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+.hdr-info { color: #c0c0c0; font-size: 11px; }
+.nav { background: #808080; }
+.nav-cell { border-right: 1px solid #fff; color: #fff; display: inline-block; padding: 5px 12px; }
+.nav-current { background: #d4d0c8; color: #000080; font-weight: bold; }
+.page { padding: 10px 12px 20px; }
+h1 { border-bottom: 2px solid #000080; font-size: 15px; margin: 4px 0 10px; padding-bottom: 3px; }
+.columns { align-items: flex-start; display: grid; gap: 28px; grid-template-columns: minmax(0, 72%) minmax(220px, 28%); }
+.ftr { background: #808080; color: #fff; font-size: 11px; margin-top: 16px; padding: 5px 12px; }
+
+@media (max-width: 900px) {
+  .columns { display: block; }
+}
