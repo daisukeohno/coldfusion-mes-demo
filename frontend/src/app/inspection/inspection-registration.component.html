@@ -4,9 +4,11 @@
       <label>製造指示
         <select formControlName="shiji_no">
           <option value="" disabled>選択してください</option>
-          <option *ngFor="let order of orders" [value]="order.shiji_no">
+          @for (order of orders(); track order.shiji_no) {
+          <option [value]="order.shiji_no">
             {{ order.shiji_no }} / {{ order.hinmoku_nm }}
           </option>
+          }
         </select>
       </label>
       <label>ロット <input type="text" formControlName="lot_no" /></label>
@@ -15,13 +17,19 @@
       <label>規格下限 <input type="text" formControlName="kijun_min" /></label>
       <label>規格上限 <input type="text" formControlName="kijun_max" /></label>
       <label class="wide">不良内容 <input type="text" formControlName="furyo_naiyo" /></label>
-      <button class="btn" type="submit" [disabled]="loading">
-        {{ loading ? '登録中...' : '判定・登録' }}
+      <button class="btn" type="submit" [disabled]="loading()">
+        {{ loading() ? '登録中...' : '判定・登録' }}
       </button>
     </div>
   </form>
   <p class="note">※ 判定は規格範囲で自動決定します。規格上限との差が 0.010mm 未満の場合は「再検査」となります (2011年 暫定運用)。</p>
-  <p *ngIf="preview" class="preview">画面上のプレビュー: <strong [class.ng]="preview !== 'OK'">{{ preview }}</strong></p>
-  <p *ngIf="result" class="success">登録しました。API確定判定は <strong>{{ result.hantei }}</strong> です。</p>
-  <p *ngIf="error" class="error">{{ error }}</p>
+  @if (preview(); as currentPreview) {
+    <p class="preview">画面上のプレビュー: <strong [class.ng]="currentPreview !== 'OK'">{{ currentPreview }}</strong></p>
+  }
+  @if (result(); as savedResult) {
+    <p class="success">登録しました。API確定判定は <strong>{{ savedResult.hantei }}</strong> です。</p>
+  }
+  @if (error(); as message) {
+    <p class="error">{{ message }}</p>
+  }
 </section>

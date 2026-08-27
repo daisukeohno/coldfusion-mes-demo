@@ -1,8 +1,14 @@
 <section>
   <h2>■ 不良内容 集計</h2>
-  <p *ngIf="error" class="error">{{ error }}</p>
+  @if (error(); as message) {
+    <p class="error">{{ message }}</p>
+  }
   <table class="grid">
     <thead><tr><th>不良内容</th><th>件数</th></tr></thead>
-    <tbody><tr *ngFor="let summary of summaries"><td>{{ summary.furyo_naiyo }}</td><td class="num">{{ summary.ken }}</td></tr></tbody>
+    <tbody>
+      @for (summary of summaries(); track summary.furyo_naiyo) {
+        <tr><td>{{ summary.furyo_naiyo }}</td><td class="num">{{ summary.ken }}</td></tr>
+      }
+    </tbody>
   </table>
 </section>

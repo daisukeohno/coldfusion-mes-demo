@@ -1,13 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InspectionApiService } from './inspection-api.service';
 import { InspectionJudgmentService } from './inspection-judgment.service';
+import { InspectionRefreshService } from './inspection-refresh.service';
 import { InspectionRecord, ProductionOrder } from './inspection.types';
 
 @Component({
   selector: 'app-inspection-registration',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './inspection-registration.component.html',
   styleUrl: './inspection-registration.component.css',
 })
@@ -15,6 +15,7 @@ export class InspectionRegistrationComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly api = inject(InspectionApiService);
   private readonly judgmentService = inject(InspectionJudgmentService);
+  private readonly refreshService = inject(InspectionRefreshService);
 
   readonly form = this.formBuilder.nonNullable.group({
     shiji_no: ['', Validators.required],
@@ -25,56 +26,57 @@ export class InspectionRegistrationComponent implements OnInit {
     kijun_max: ['220.100', Validators.required],
     furyo_naiyo: [''],
   });
-  orders: ProductionOrder[] = [];
-  preview: string | null = null;
-  result: InspectionRecord | null = null;
-  error = '';
-  loading = false;
+  readonly orders = signal<ProductionOrder[]>([]);
+  readonly preview = signal<string | null>(null);
+  readonly result = signal<InspectionRecord | null>(null);
+  readonly error = signal('');
+  readonly loading = signal(false);
 
   ngOnInit(): void {
     this.updatePreview();
     this.form.valueChanges.subscribe(() => this.updatePreview());
     this.api.getProductionOrders().subscribe({
       next: (orders) => {
-        this.orders = orders;
+        this.orders.set(orders);
         if (!this.form.controls.shiji_no.value && orders.length) {
           this.form.controls.shiji_no.setValue(orders[0].shiji_no);
         }
       },
-      error: () => (this.error = '製造指示の取得に失敗しました。'),
+      error: () => this.error.set('製造指示の取得に失敗しました。'),
     });
   }
 
   submit(): void {
-    this.error = '';
-    this.result = null;
+    this.error.set('');
+    this.result.set(null);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    this.loading = true;
+    this.loading.set(true);
     this.api.createInspection(this.form.getRawValue()).subscribe({
       next: (record) => {
-        this.result = record;
-        this.loading = false;
+        this.result.set(record);
+        this.loading.set(false);
+        this.refreshService.notify();
       },
       error: (error: { error?: { message?: string | string[] } }) => {
         const message = error.error?.message;
-        this.error = Array.isArray(message)
+        this.error.set(Array.isArray(message)
           ? message.join(' ')
-          : message || '検査結果の登録に失敗しました。';
-        this.loading = false;
+          : message || '検査結果の登録に失敗しました。');
+        this.loading.set(false);
       },
     });
   }
 
   private updatePreview(): void {
     const values = this.form.getRawValue();
-    this.preview = this.judgmentService.judge(
+    this.preview.set(this.judgmentService.judge(
       values.sunpou,
       values.kijun_min,
       values.kijun_max,
-    );
+    ));
   }
 
   private defaultLot(): string {
