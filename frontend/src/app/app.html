@@ -1,0 +1,220 @@
+<header class="system-header">
+  <div>
+    <span class="system-name">生産管理システム</span>
+    <span class="system-version">SEIZO-MES Ver.3.2 / Modern UI</span>
+  </div>
+  <div class="system-meta">品質保証部 ｜ 担当者: 未ログイン</div>
+</header>
+
+<nav class="navigation" aria-label="メインメニュー">
+  <span>ダッシュボード</span>
+  <span>製造指示</span>
+  <span>工程進捗</span>
+  <span class="active">品質検査</span>
+  <span>設備保全</span>
+  <span>生産日報</span>
+</nav>
+
+<main>
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">QUALITY INSPECTION</p>
+      <h1>品質検査</h1>
+    </div>
+    <span class="api-badge">Angular + REST API</span>
+  </div>
+
+  @if (resultMessage) {
+    <div class="message message-success" role="status">{{ resultMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="message message-error" role="alert">{{ errorMessage }}</div>
+  }
+
+  <section class="panel registration-panel">
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">REGISTER</p>
+        <h2>検査結果を登録</h2>
+      </div>
+      <span>測定単位: mm</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
+        <label class="field field-wide">
+          <span>製造指示</span>
+          <select formControlName="shiji_no">
+            @for (order of orders; track order.shiji_no) {
+              <option [value]="order.shiji_no">
+                {{ order.shiji_no }} / {{ order.hinmoku_nm }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>ロット</span>
+          <input type="text" formControlName="lot_no" />
+        </label>
+
+        <label class="field">
+          <span>検査者</span>
+          <input type="text" formControlName="kensa_sha" />
+        </label>
+
+        <label class="field measurement">
+          <span>測定値</span>
+          <div class="input-with-unit">
+            <input type="text" inputmode="decimal" formControlName="sunpou" />
+            <span>mm</span>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>規格下限</span>
+          <div class="input-with-unit">
+            <input type="text" inputmode="decimal" formControlName="kijun_min" />
+            <span>mm</span>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>規格上限</span>
+          <div class="input-with-unit">
+            <input type="text" inputmode="decimal" formControlName="kijun_max" />
+            <span>mm</span>
+          </div>
+        </label>
+
+        <label class="field field-wide">
+          <span>不良内容</span>
+          <input
+            type="text"
+            formControlName="furyo_naiyo"
+            placeholder="不良時のみ入力"
+          />
+        </label>
+
+        <div class="submit-area">
+          <button type="submit" [disabled]="submitting || orders.length === 0">
+            {{ submitting ? '登録中...' : '判定・登録' }}
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <p class="rule-note">
+      規格上限との差が 0.010mm 未満の場合は再検査 (2011年 暫定運用)
+    </p>
+  </section>
+
+  <div class="content-grid">
+    <section class="panel history-panel">
+      <div class="section-heading history-heading">
+        <div>
+          <p class="section-kicker">HISTORY</p>
+          <h2>検査履歴</h2>
+        </div>
+        <div class="filters" aria-label="判定絞込">
+          <button
+            type="button"
+            [class.selected]="selectedFilter === ''"
+            (click)="applyFilter('')"
+          >
+            すべて
+          </button>
+          <button
+            type="button"
+            [class.selected]="selectedFilter === 'NG'"
+            (click)="applyFilter('NG')"
+          >
+            NGのみ
+          </button>
+          <button
+            type="button"
+            [class.selected]="selectedFilter === '再検査'"
+            (click)="applyFilter('再検査')"
+          >
+            再検査のみ
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>指示番号 / 品目名</th>
+              <th>ライン</th>
+              <th>ロット</th>
+              <th>検査日</th>
+              <th>検査者</th>
+              <th class="number">測定値</th>
+              <th class="number">規格範囲</th>
+              <th>判定</th>
+              <th>不良内容</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inspection of inspections; track inspection.kensa_id) {
+              <tr>
+                <td class="muted">#{{ inspection.kensa_id }}</td>
+                <td>
+                  <strong>{{ inspection.shiji_no }}</strong>
+                  <small>{{ inspection.hinmoku_nm }}</small>
+                </td>
+                <td>{{ inspection.line_cd || '—' }}</td>
+                <td>{{ inspection.lot_no || '—' }}</td>
+                <td>{{ inspection.kensa_ymd | date: 'yyyy/MM/dd' }}</td>
+                <td>{{ inspection.kensa_sha || '—' }}</td>
+                <td class="number">{{ inspection.sunpou }}</td>
+                <td class="number">
+                  {{ inspection.kijun_min }} – {{ inspection.kijun_max }}
+                </td>
+                <td>
+                  <span [class]="judgmentClass(inspection.hantei)">
+                    {{ inspection.hantei }}
+                  </span>
+                </td>
+                <td>{{ inspection.furyo_naiyo || '—' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10" class="empty">
+                  {{ loading ? '読み込み中...' : '該当する検査履歴はありません。' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="record-count">{{ inspections.length }} 件</p>
+    </section>
+
+    <aside class="panel summary-panel">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">DEFECT SUMMARY</p>
+          <h2>不良内容 集計</h2>
+        </div>
+      </div>
+      <div class="summary-list">
+        @for (summary of defectSummary; track summary.furyo_naiyo) {
+          <div class="summary-row">
+            <span>{{ summary.furyo_naiyo }}</span>
+            <strong>{{ summary.ken }}<small> 件</small></strong>
+          </div>
+        } @empty {
+          <p class="empty">集計対象はありません。</p>
+        }
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <span>(C) 1998–2026 SEIZO-MES / 情報システム部</span>
+  <span>画面ID: inspection</span>
+</footer>
