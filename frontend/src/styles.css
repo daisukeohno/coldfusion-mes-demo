@@ -1,0 +1,17 @@
+html {
+  min-width: 320px;
+  background: #eef1f5;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family:
+    "Noto Sans JP", "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
