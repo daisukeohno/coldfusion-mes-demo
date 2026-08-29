@@ -1,0 +1,34 @@
+/* app/mes.css のダッシュボード用スタイルを踏襲 */
+.kpi {
+  background: #ffffff;
+  border: 2px inset #ffffff;
+  padding: 8px 12px;
+  text-align: center;
+}
+.kpi .v {
+  font-size: 22px;
+  font-weight: bold;
+  color: #000080;
+}
+.kpi .vNg {
+  color: #cc0000;
+}
+.kpi .l {
+  font-size: 11px;
+  color: #404040;
+}
+.bar {
+  background: #000080;
+  height: 10px;
+  display: inline-block;
+}
+.barBg {
+  background: #c0c0c0;
+  width: 100px;
+  height: 10px;
+  display: inline-block;
+}
+.asOf {
+  font-weight: normal;
+  font-size: 11px;
+}
