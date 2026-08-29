@@ -1,0 +1,87 @@
+<h1>製造指示 一覧</h1>
+
+<div class="box" *ngIf="message">
+  <b class="ng">{{ message }}</b>
+</div>
+
+<div class="box">
+  <form (ngSubmit)="search()">
+    <table border="0" cellpadding="3" cellspacing="0">
+      <tr>
+        <td>キーワード</td>
+        <td><input type="text" name="kw" size="24" [(ngModel)]="form.kw" /></td>
+        <td>&nbsp;状態</td>
+        <td>
+          <select name="status" [(ngModel)]="form.status">
+            <option value="">(すべて)</option>
+            <option *ngFor="let st of statusList" [value]="st">{{ st }}</option>
+          </select>
+        </td>
+        <td>&nbsp;ライン</td>
+        <td>
+          <select name="line" [(ngModel)]="form.line">
+            <option value="">(すべて)</option>
+            <option *ngFor="let ln of lineList" [value]="ln">{{ ln }}</option>
+          </select>
+        </td>
+        <td>&nbsp;<button type="submit" class="btn" [disabled]="loading">　検索　</button></td>
+        <td>&nbsp;<button type="button" class="btn" (click)="clear()">クリア</button></td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<table class="grid" width="100%">
+  <tr>
+    <th>
+      <a href="javascript:void(0)" class="sortLink" (click)="sortBy('shiji_no')">指示番号</a>
+    </th>
+    <th>品目コード</th>
+    <th>品目名</th>
+    <th>ライン</th>
+    <th>指示数</th>
+    <th>完了数</th>
+    <th>不良数</th>
+    <th>進捗率</th>
+    <th><a href="javascript:void(0)" class="sortLink" (click)="sortBy('noki_ymd')">納期</a></th>
+    <th>状態</th>
+    <th>得意先</th>
+    <th>備考</th>
+    <th>&nbsp;</th>
+  </tr>
+  <tr *ngFor="let row of orders; index as i" [ngClass]="rowClass(row, i)">
+    <td>
+      <a routerLink="/order-detail" [queryParams]="{ shiji_no: row.shiji_no }">{{
+        row.shiji_no
+      }}</a>
+    </td>
+    <td>{{ row.hinmoku_cd }}</td>
+    <td>{{ row.hinmoku_nm }}</td>
+    <td>{{ row.line_cd }}</td>
+    <td class="num">{{ formatNumber(row.suryo) }}</td>
+    <td class="num">{{ formatNumber(row.kanryo_suryo) }}</td>
+    <td class="num">
+      <span *ngIf="row.furyo_suryo > 0; else noDefect" class="ng">{{ row.furyo_suryo }}</span>
+      <ng-template #noDefect>0</ng-template>
+    </td>
+    <td>
+      <span class="barBg"><span class="bar" [style.width.px]="row.rate"></span></span>&nbsp;{{
+        row.rate
+      }}%
+    </td>
+    <td>
+      {{ formatDate(row.noki_ymd) }}<span *ngIf="row.okure" class="ng"> 遅</span>
+    </td>
+    <td>{{ row.status }}</td>
+    <td>{{ row.tokui_nm }}</td>
+    <td>{{ row.bikou }}</td>
+    <td>
+      <a routerLink="/progress" [queryParams]="{ shiji_no: row.shiji_no }">実績入力</a>
+    </td>
+  </tr>
+</table>
+<p>{{ recordCount }} 件</p>
+<div class="note">
+  ※ 納期遅れ (背景赤 /「遅」) は「完了」以外で納期が本日より前の行です。当日納期は遅れになりません。<br />
+  ※ 進捗率は 完了数 ÷ 指示数 の小数以下切り捨てです。指示数が 0 の場合は 0% です。
+</div>
