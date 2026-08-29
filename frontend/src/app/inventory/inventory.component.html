@@ -1,0 +1,100 @@
+<h1>部品在庫</h1>
+
+<div class="box" *ngIf="message">
+  <b [class.ng]="messageIsError">{{ message }}</b>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="6" width="100%">
+  <tr valign="top">
+    <td width="25%">
+      <div class="kpi">
+        <div class="v">{{ buhinKen }}</div>
+        <div class="l">部品点数</div>
+      </div>
+    </td>
+    <td width="25%">
+      <div class="kpi">
+        <div class="v">{{ format(totalKingaku) }}</div>
+        <div class="l">在庫金額 合計 (円)</div>
+      </div>
+    </td>
+    <td width="50%">
+      <div class="box" style="margin: 0">
+        倉庫絞込:&nbsp;<a href="javascript:void(0)" (click)="filterBySouko('')">すべて</a>
+        <ng-container *ngFor="let w of warehouses"
+          >&nbsp;|&nbsp;<a href="javascript:void(0)" (click)="filterBySouko(w.souko_cd)"
+            >{{ w.souko_cd }} ({{ w.ken }}件)</a
+          ></ng-container
+        >
+      </div>
+    </td>
+  </tr>
+</table>
+
+<h2>■ 在庫一覧</h2>
+<table class="grid" width="100%">
+  <tr>
+    <th>部品コード</th>
+    <th>部品名</th>
+    <th>倉庫</th>
+    <th>在庫数</th>
+    <th>安全在庫</th>
+    <th>発注点</th>
+    <th>判定</th>
+    <th>単価</th>
+    <th>在庫金額</th>
+    <th>仕入先</th>
+    <th>入出庫</th>
+  </tr>
+  <tr *ngFor="let row of items; index as i" [ngClass]="rowClass(row, i)">
+    <td>{{ row.buhin_cd }}</td>
+    <td>{{ row.buhin_nm }}</td>
+    <td>{{ row.souko_cd }}</td>
+    <td class="num">{{ format(row.zaiko_su) }}</td>
+    <td class="num">{{ format(row.anzen_zaiko) }}</td>
+    <td class="num">{{ format(row.hacchu_ten) }}</td>
+    <td>
+      <span [class]="row.hantei === '適正' ? 'ok' : 'ng'">{{ row.hantei }}</span>
+    </td>
+    <td class="num">{{ format(row.tanka) }}</td>
+    <td class="num">{{ format(row.kingaku) }}</td>
+    <td>{{ row.shiire_nm }}</td>
+    <td>
+      <input
+        type="text"
+        size="4"
+        [ngModel]="quantityOf(row)"
+        (ngModelChange)="setQuantity(row, $event)"
+        [name]="'su-' + rowKey(row)"
+      />
+      <button type="button" class="btn" [disabled]="submitting" (click)="submitMovement(row, 'nyuko')">
+        入庫
+      </button>
+      <button
+        type="button"
+        class="btn"
+        [disabled]="submitting"
+        (click)="submitMovement(row, 'shukko')"
+      >
+        出庫
+      </button>
+    </td>
+  </tr>
+</table>
+
+<h2>■ 倉庫別 在庫金額</h2>
+<table class="grid">
+  <tr>
+    <th>倉庫</th>
+    <th>部品点数</th>
+    <th>在庫金額 (円)</th>
+  </tr>
+  <tr *ngFor="let w of warehouses; index as i" [ngClass]="(i + 1) % 2 === 0 ? 'alt' : ''">
+    <td>{{ w.souko_cd }}</td>
+    <td class="num">{{ w.ken }}</td>
+    <td class="num">{{ format(w.kingaku) }}</td>
+  </tr>
+</table>
+<div class="note">
+  ※ 入出庫は在庫数を直接更新します。履歴テーブルがないため、棚卸差異の原因追跡はできません。
+</div>
