@@ -1,0 +1,16 @@
+.note-box {
+  margin-top: 14px;
+}
+
+.bar {
+  background: #000080;
+  height: 10px;
+  display: inline-block;
+}
+
+.barBg {
+  background: #c0c0c0;
+  width: 100px;
+  height: 10px;
+  display: inline-block;
+}

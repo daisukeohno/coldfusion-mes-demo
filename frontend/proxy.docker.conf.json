@@ -3,5 +3,13 @@
     "target": "http://api:3000",
     "secure": false,
     "changeOrigin": true
+  },
+  "/legacy": {
+    "target": "http://web:8888",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/legacy": ""
+    }
   }
 }

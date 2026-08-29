@@ -1,0 +1,187 @@
+<h1 *ngIf="detail">製造指示 詳細&nbsp;&nbsp;{{ detail.shiji.shiji_no }}</h1>
+<h1 *ngIf="!detail">製造指示 詳細</h1>
+
+<div class="box" *ngIf="message">
+  <b [class.ng]="messageIsError">{{ message }}</b>
+</div>
+
+<div class="box">
+  <label>
+    製造指示
+    <select
+      name="shiji_no"
+      [(ngModel)]="selectedShijiNo"
+      (ngModelChange)="selectShijiNo($event)"
+    >
+      <option value="">(選択してください)</option>
+      <option *ngFor="let order of shijiOrders" [value]="order.shiji_no">
+        {{ order.shiji_no }} / {{ order.hinmoku_nm }}
+      </option>
+    </select>
+  </label>
+  <span *ngIf="loading"> 読み込み中...</span>
+</div>
+
+<ng-container *ngIf="detail as data">
+  <table border="0" cellpadding="0" cellspacing="8" width="100%">
+    <tr valign="top">
+      <td width="55%">
+        <table class="grid" width="100%">
+          <tr>
+            <th width="130">指示番号</th>
+            <td>{{ data.shiji.shiji_no }}</td>
+            <th width="130">状態</th>
+            <td>{{ data.shiji.status }}</td>
+          </tr>
+          <tr>
+            <th>品目コード</th>
+            <td>{{ data.shiji.hinmoku_cd }}</td>
+            <th>ライン</th>
+            <td>{{ data.shiji.line_cd }}</td>
+          </tr>
+          <tr>
+            <th>品目名</th>
+            <td colspan="3">{{ data.shiji.hinmoku_nm }}</td>
+          </tr>
+          <tr>
+            <th>規格</th>
+            <td colspan="3">{{ data.shiji.kikaku }}</td>
+          </tr>
+          <tr>
+            <th>得意先</th>
+            <td colspan="3">{{ data.shiji.tokui_nm }}</td>
+          </tr>
+          <tr>
+            <th>指示数</th>
+            <td>{{ formatNumber(data.shiji.suryo) }} {{ data.shiji.tani }}</td>
+            <th>納期</th>
+            <td>{{ formatDate(data.shiji.noki_ymd) }}</td>
+          </tr>
+          <tr>
+            <th>完了数</th>
+            <td>{{ formatNumber(data.shiji.kanryo_suryo) }} {{ data.shiji.tani }}</td>
+            <th>残数</th>
+            <td>{{ formatNumber(data.summary.zan) }} {{ data.shiji.tani }}</td>
+          </tr>
+          <tr>
+            <th>不良数</th>
+            <td>
+              <span *ngIf="hasDefect(data.shiji.furyo_suryo)" class="ng">
+                {{ data.shiji.furyo_suryo }}
+              </span>
+              <ng-container *ngIf="!hasDefect(data.shiji.furyo_suryo)">0</ng-container>
+            </td>
+            <th>進捗率</th>
+            <td>
+              <span class="barBg"><span class="bar" [style.width.px]="data.summary.rate"></span></span
+              >&nbsp;{{ data.summary.rate }}%
+            </td>
+          </tr>
+          <tr>
+            <th>標準工数</th>
+            <td>
+              {{ formatFixed(data.shiji.hyojun_jikan, 2) || '-' }} 分/個
+            </td>
+            <th>予定工数</th>
+            <td>{{ formatNumber(data.summary.yotei_kosu) || '-' }} 分</td>
+          </tr>
+          <tr>
+            <th>登録日時</th>
+            <td>{{ formatDateTime(data.shiji.toroku_ymd) }}</td>
+            <th>備考</th>
+            <td>{{ data.shiji.bikou }}</td>
+          </tr>
+        </table>
+
+        <h2>■ 工程実績</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>工程</th>
+            <th>工程名</th>
+            <th>設備</th>
+            <th>作業者</th>
+            <th>開始</th>
+            <th>終了</th>
+            <th>良品数</th>
+            <th>不良数</th>
+          </tr>
+          <tr
+            *ngFor="let row of data.kotei; index as i"
+            [ngClass]="processRowClass(i)"
+          >
+            <td class="num">{{ row.kotei_no }}</td>
+            <td>{{ row.kotei_nm }}</td>
+            <td>{{ equipment(row) }}</td>
+            <td>{{ row.sagyousha }}</td>
+            <td>{{ formatMonthDateTime(row.kaishi_dt) }}</td>
+            <td>
+              <ng-container *ngIf="row.shuryo_dt; else working">
+                {{ formatMonthDateTime(row.shuryo_dt) }}
+              </ng-container>
+              <ng-template #working><span class="ng">作業中</span></ng-template>
+            </td>
+            <td class="num">{{ row.yoryo_suryo }}</td>
+            <td class="num">
+              <span *ngIf="hasDefect(row.furyo_suryo)" class="ng">{{ row.furyo_suryo }}</span>
+              <ng-container *ngIf="!hasDefect(row.furyo_suryo)">0</ng-container>
+            </td>
+          </tr>
+          <tr *ngIf="data.kotei.length === 0">
+            <td colspan="8">工程実績は未登録です。</td>
+          </tr>
+        </table>
+        <p>
+          <!-- 未移行画面への暫定リンク -->
+          <a [href]="'/legacy/progress.cfm?shiji_no=' + data.shiji.shiji_no"
+            >▶ この指示の実績を入力する</a
+          >
+        </p>
+      </td>
+      <td width="45%">
+        <h2>■ 検査結果</h2>
+        <table class="grid" width="100%">
+          <tr>
+            <th>ロット</th>
+            <th>検査日</th>
+            <th>検査者</th>
+            <th>測定値</th>
+            <th>規格</th>
+            <th>判定</th>
+            <th>不良内容</th>
+          </tr>
+          <tr
+            *ngFor="let row of data.kensa; index as i"
+            [ngClass]="inspectionRowClass(row, i)"
+          >
+            <td>{{ row.lot_no }}</td>
+            <td>{{ formatMonthDate(row.kensa_ymd) }}</td>
+            <td>{{ row.kensa_sha }}</td>
+            <td class="num">{{ formatFixed(row.sunpou, 3) }}</td>
+            <td class="num">
+              {{ formatFixed(row.kijun_min, 3) }} - {{ formatFixed(row.kijun_max, 3) }}
+            </td>
+            <td><span [class]="inspectionClass(row)">{{ row.hantei }}</span></td>
+            <td>{{ row.furyo_naiyo }}</td>
+          </tr>
+          <tr *ngIf="data.kensa.length === 0">
+            <td colspan="7">検査結果は未登録です。</td>
+          </tr>
+        </table>
+        <p>
+          <a routerLink="/"
+            >▶ 検査結果を入力する</a
+          >
+        </p>
+
+        <div class="box note-box">
+          <b>※ 画面仕様書 (1998年版) より</b><br />
+          本画面の進捗率は「完了数 ÷ 指示数」で算出する。<br />
+          不良数は工程実績の合計と一致しない場合がある (検査での不良を含まないため)。
+        </div>
+      </td>
+    </tr>
+  </table>
+</ng-container>
+
+<!-- 未移行画面への暫定リンク -->
+<p><a href="/legacy/orders.cfm">&lt;&lt; 一覧へ戻る</a></p>
