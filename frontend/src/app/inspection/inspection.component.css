@@ -1,0 +1,9 @@
+.form-table td { padding: 4px; }
+.form-table td.label { width: 90px; white-space: nowrap; }
+.note { font-size: 11px; color: #606060; padding-top: 4px; }
+.columns { display: flex; gap: 16px; align-items: flex-start; }
+.main { flex: 0 0 72%; }
+.side { flex: 1; }
+.full { width: 100%; }
+.filters { font-weight: normal; font-size: 11px; }
+.filters a.cur { font-weight: bold; text-decoration: none; }
