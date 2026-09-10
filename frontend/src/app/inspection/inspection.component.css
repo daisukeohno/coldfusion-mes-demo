@@ -1,0 +1,7 @@
+.hint { font-size: 11px; color: #606060; padding-top: 4px; }
+.filter { font-weight: normal; font-size: 11px; }
+.filter a { cursor: pointer; text-decoration: underline; }
+.filter a.cur { font-weight: bold; text-decoration: none; }
+.preview { font-size: 11px; color: #404040; padding-left: 8px; }
+.layout { width: 100%; border-spacing: 8px; }
+.layout > tbody > tr > td { vertical-align: top; }
