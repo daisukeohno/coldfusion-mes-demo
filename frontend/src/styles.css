@@ -1,0 +1,22 @@
+/* app/mes.css (1998年作成) を移行版でも踏襲 */
+body { font-family: "MS PGothic", "Hiragino Kaku Gothic Pro", sans-serif; font-size: 12px; margin: 0; }
+a { color: #000080; }
+.hdr { background: #000080; }
+.hdrTitle { color: #ffffff; font-size: 14px; font-weight: bold; padding: 6px 10px; letter-spacing: 1px; }
+.hdrInfo { color: #c0c0c0; font-size: 11px; }
+.page { padding: 10px 12px 20px 12px; }
+h1 { font-size: 15px; border-bottom: 2px solid #000080; padding-bottom: 3px; margin: 4px 0 10px 0; }
+h2 { font-size: 13px; margin: 14px 0 6px 0; }
+.grid { border-collapse: collapse; background: #ffffff; }
+.grid th { background: #000080; color: #ffffff; font-size: 11px; font-weight: normal; padding: 4px 7px; border: 1px solid #808080; white-space: nowrap; }
+.grid td { font-size: 12px; padding: 3px 7px; border: 1px solid #c0c0c0; }
+.grid tr.alt td { background: #f2f2f2; }
+.grid td.num { text-align: right; }
+.box { background: #efefef; border: 2px inset #ffffff; padding: 8px 10px; margin-bottom: 12px; }
+.ng { color: #cc0000; font-weight: bold; }
+.ok { color: #006600; }
+.warn { background: #ffffcc; }
+.late { background: #ffdddd; }
+.ftr { background: #808080; color: #ffffff; font-size: 11px; margin-top: 16px; padding: 4px 0; }
+input, select, textarea { font-family: "MS PGothic", sans-serif; font-size: 12px; }
+.btn { font-size: 12px; padding: 2px 10px; }

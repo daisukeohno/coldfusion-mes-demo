@@ -28,6 +28,19 @@ open http://localhost:8888/index.cfm
 - `db`: MySQL 8.0、`db/*.sql` を初期化時に投入 (スキーマ + デモデータ)
 - 停止と初期化: `docker compose down -v`
 
+## 移行版 (Angular + REST API): 品質検査
+
+`app/inspection.cfm` の品質検査機能を Angular コンポーネント (`frontend/`) と NestJS REST API (`api/`) に移行した実装を同梱しています。
+判定ロジック (OK / NG / 再検査) は `InspectionJudgmentService` に切り出し、境界値テストを付けています。
+
+```bash
+docker compose up -d                                   # MySQL はホストの 3306 にも公開
+(cd api && npm install && MES_DB_HOST=127.0.0.1 npm run start:dev)   # http://localhost:3000/api/inspections
+(cd frontend && npm install && npm start)              # http://localhost:4200
+```
+
+起動方法・API 一覧・旧 `inspection.cfm` との対応関係は [`docs/inspection_migration.md`](docs/inspection_migration.md) を参照してください。
+
 ## 意図的に残しているレガシーの特徴
 
 移行デモの題材になるよう、実際の20年級 CFML システムでよく見る構造をそのまま入れています。
