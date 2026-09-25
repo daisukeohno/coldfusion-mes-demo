@@ -28,6 +28,18 @@ open http://localhost:8888/index.cfm
 - `db`: MySQL 8.0、`db/*.sql` を初期化時に投入 (スキーマ + デモデータ)
 - 停止と初期化: `docker compose down -v`
 
+## 移行版 (品質検査画面)
+
+`app/inspection.cfm` を Spring Boot REST API (`backend/`) + Angular (`frontend/`) に移行したものを同梱しています。
+判定ロジック (OK / NG / 再検査) は `InspectionJudgmentService` に切り出し、境界値テストで旧画面との同等性を担保しています。
+保持した業務ルール・API 仕様・テストの意図は `docs/inspection_migration.md` を参照してください。
+
+```bash
+docker compose up -d db
+(cd backend && mvn spring-boot:run)          # http://localhost:8080/api/inspections
+(cd frontend && npm install && npm start)    # http://localhost:4200
+```
+
 ## 意図的に残しているレガシーの特徴
 
 移行デモの題材になるよう、実際の20年級 CFML システムでよく見る構造をそのまま入れています。
