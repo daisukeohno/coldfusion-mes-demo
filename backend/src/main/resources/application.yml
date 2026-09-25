@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mes-inspection-api
+  datasource:
+    url: jdbc:mysql://${MES_DB_HOST:127.0.0.1}:${MES_DB_PORT:3306}/${MES_DB_NAME:mesdb}?characterEncoding=utf8&serverTimezone=Asia/Tokyo
+    username: ${MES_DB_USER:mesuser}
+    password: ${MES_DB_PASSWORD:mespass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    default-property-inclusion: always
