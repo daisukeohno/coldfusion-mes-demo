@@ -1,0 +1,60 @@
+@if (message(); as msg) {
+  <div class="box">
+    <b [class.ng]="msg.isError">{{ msg.text }}</b>
+  </div>
+}
+
+<div class="box">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <table border="0" cellpadding="4" cellspacing="0">
+      <tr>
+        <td width="90"><label for="shiji_no">製造指示</label></td>
+        <td>
+          <select id="shiji_no" formControlName="shiji_no">
+            @for (order of productionOrders(); track order.shiji_no) {
+              <option [value]="order.shiji_no">
+                {{ order.shiji_no }} / {{ order.hinmoku_nm }}
+              </option>
+            }
+          </select>
+        </td>
+        <td width="60"><label for="lot_no">ロット</label></td>
+        <td><input id="lot_no" type="text" formControlName="lot_no" size="14" /></td>
+        <td width="60"><label for="kensa_sha">検査者</label></td>
+        <td><input id="kensa_sha" type="text" formControlName="kensa_sha" size="12" /></td>
+      </tr>
+      <tr>
+        <td><label for="sunpou">測定値 (mm)</label></td>
+        <td><input id="sunpou" type="text" formControlName="sunpou" size="10" /></td>
+        <td><label for="kijun_min">規格下限</label></td>
+        <td><input id="kijun_min" type="text" formControlName="kijun_min" size="10" /></td>
+        <td><label for="kijun_max">規格上限</label></td>
+        <td><input id="kijun_max" type="text" formControlName="kijun_max" size="10" /></td>
+      </tr>
+      <tr>
+        <td><label for="furyo_naiyo">不良内容</label></td>
+        <td colspan="3">
+          <input id="furyo_naiyo" type="text" formControlName="furyo_naiyo" size="46" />
+        </td>
+        <td colspan="2">
+          <input type="submit" value="　判定・登録　" class="btn" [disabled]="submitting()" />
+        </td>
+      </tr>
+    </table>
+  </form>
+  <div class="note">
+    ※ 判定は規格範囲で自動決定します。規格上限との差が 0.010mm 未満の場合は「再検査」となります
+    (2011年 暫定運用)。
+  </div>
+  <div class="note" data-testid="judgment-preview">
+    判定プレビュー:
+    @if (preview(); as p) {
+      @if ('hantei' in p) {
+        <span [class.ok]="p.hantei === 'OK'" [class.ng]="p.hantei !== 'OK'">{{ p.hantei }}</span>
+      } @else {
+        <span class="ng">{{ p.error }}</span>
+      }
+    }
+    (確定判定は登録時にサーバで行います)
+  </div>
+</div>

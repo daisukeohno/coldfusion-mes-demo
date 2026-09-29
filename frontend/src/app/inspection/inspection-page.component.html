@@ -1,0 +1,22 @@
+<h1>品質検査</h1>
+
+<app-inspection-form
+  [productionOrders]="productionOrders.value() ?? []"
+  [selectedShijiNo]="shiji_no() ?? ''"
+  (registered)="onRegistered()"
+/>
+
+@if (records.error() || defectSummary.error() || productionOrders.error()) {
+  <div class="box"><b class="ng">データの取得に失敗しました。</b></div>
+}
+
+<table border="0" cellpadding="0" cellspacing="8" width="100%">
+  <tr valign="top">
+    <td width="72%">
+      <app-inspection-history [records]="records.value() ?? []" />
+    </td>
+    <td width="28%">
+      <app-defect-summary [summary]="defectSummary.value() ?? []" />
+    </td>
+  </tr>
+</table>

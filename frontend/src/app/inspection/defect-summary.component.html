@@ -1,0 +1,13 @@
+<h2>■ 不良内容 集計</h2>
+<table class="grid" width="100%">
+  <tr>
+    <th>不良内容</th>
+    <th>件数</th>
+  </tr>
+  @for (row of summary(); track row.furyo_naiyo; let i = $index) {
+    <tr [class.alt]="(i + 1) % 2 === 0">
+      <td>{{ row.furyo_naiyo }}</td>
+      <td class="num">{{ row.ken }}</td>
+    </tr>
+  }
+</table>
