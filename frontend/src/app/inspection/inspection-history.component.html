@@ -1,0 +1,48 @@
+<h2>
+  ■ 検査履歴 &nbsp;<span class="filters">
+    絞込: <a routerLink="/inspection">すべて</a> |
+    <a routerLink="/inspection" [queryParams]="{ hantei: 'NG' }">NGのみ</a> |
+    <a routerLink="/inspection" [queryParams]="{ hantei: '再検査' }">再検査のみ</a>
+  </span>
+</h2>
+<table class="grid" width="100%">
+  <tr>
+    <th>検査ID</th>
+    <th>指示番号</th>
+    <th>品目名</th>
+    <th>ライン</th>
+    <th>ロット</th>
+    <th>検査日</th>
+    <th>検査者</th>
+    <th>測定値</th>
+    <th>規格範囲</th>
+    <th>判定</th>
+    <th>不良内容</th>
+  </tr>
+  @for (record of records(); track record.kensa_id; let i = $index) {
+    <tr [class]="rowClass(record, i)">
+      <td class="num">{{ record.kensa_id }}</td>
+      <td>
+        <a [href]="orderDetailUrl(record.shiji_no)">{{ record.shiji_no }}</a>
+      </td>
+      <td>{{ record.hinmoku_nm }}</td>
+      <td>{{ record.line_cd }}</td>
+      <td>{{ record.lot_no }}</td>
+      <td>{{ formatDate(record.kensa_ymd) }}</td>
+      <td>{{ record.kensa_sha }}</td>
+      <td class="num">{{ formatDecimal(record.sunpou) }}</td>
+      <td class="num">
+        {{ formatDecimal(record.kijun_min) }} - {{ formatDecimal(record.kijun_max) }}
+      </td>
+      <td>
+        @if (record.hantei === 'OK') {
+          <span class="ok">OK</span>
+        } @else {
+          <span class="ng">{{ record.hantei }}</span>
+        }
+      </td>
+      <td>{{ record.furyo_naiyo }}</td>
+    </tr>
+  }
+</table>
+<p>{{ records().length }} 件</p>
